@@ -142,6 +142,8 @@ export function SettingsDialog() {
   const setAIConfig = useSettingsStore((s) => s.setAIConfig)
   const language = useSettingsStore((s) => s.language)
   const setLanguage = useSettingsStore((s) => s.setLanguage)
+  const themeMode = useSettingsStore((s) => s.theme)
+  const setTheme = useSettingsStore((s) => s.setTheme)
 
   const [testing, setTesting] = useState(false)
   const [testStatus, setTestStatus] = useState<'idle' | 'ok' | 'fail'>('idle')
@@ -187,7 +189,7 @@ export function SettingsDialog() {
         <DialogHeader>
           <h2>
             <span className="material-icons-round" style={{ fontSize: 22, color: '#6750A4' }}>settings</span>
-            设置
+            {t('settings.title')}
           </h2>
           <CloseBtn onClick={handleClose}>
             <span className="material-icons-round" style={{ fontSize: 20 }}>close</span>
@@ -196,9 +198,9 @@ export function SettingsDialog() {
 
         <Body>
           <Section>
-            <SectionTitle>AI 模型配置</SectionTitle>
+            <SectionTitle>{t('settings.aiConfig')}</SectionTitle>
             <FieldGroup>
-              <Label>模型提供商</Label>
+              <Label>{t('settings.provider')}</Label>
               <Select value={aiConfig.provider} onChange={(e) => handleProviderChange(e.target.value)}>
                 {Object.entries(PROVIDER_PRESETS).map(([key, preset]) => (
                   <option key={key} value={key}>{preset.label}</option>
@@ -207,7 +209,7 @@ export function SettingsDialog() {
             </FieldGroup>
 
             <FieldGroup>
-              <Label>API Key</Label>
+              <Label>{t('settings.apiKey')}</Label>
               <Input
                 type="password"
                 value={aiConfig.apiKey}
@@ -215,22 +217,22 @@ export function SettingsDialog() {
                 placeholder="sk-xxxxxxxxxxxxxxxx"
               />
               <HelpText>
-                {aiConfig.provider === 'deepseek' && '前往 platform.deepseek.com 注册并获取 API Key'}
-                {aiConfig.provider === 'qwen' && '前往 dashscope.console.aliyun.com 开通并获取 API Key'}
-                {aiConfig.provider === 'glm' && '前往 open.bigmodel.cn 注册并获取 API Key'}
+                {aiConfig.provider === 'deepseek' && t('settings.keyHelp.deepseek')}
+                {aiConfig.provider === 'qwen' && t('settings.keyHelp.qwen')}
+                {aiConfig.provider === 'glm' && t('settings.keyHelp.glm')}
               </HelpText>
             </FieldGroup>
 
             <Row>
               <FieldGroup>
-                <Label>模型</Label>
+                <Label>{t('settings.model')}</Label>
                 <Input
                   value={aiConfig.model}
                   onChange={(e) => setAIConfig({ model: e.target.value })}
                 />
               </FieldGroup>
               <FieldGroup>
-                <Label>API 地址</Label>
+                <Label>{t('settings.apiUrl')}</Label>
                 <Input
                   value={aiConfig.baseURL}
                   onChange={(e) => setAIConfig({ baseURL: e.target.value })}
@@ -243,26 +245,33 @@ export function SettingsDialog() {
                 <span className="material-icons-round" style={{ fontSize: 16 }}>
                   {testing ? 'hourglass_top' : testStatus === 'ok' ? 'check_circle' : testStatus === 'fail' ? 'error' : 'wifi_tethering'}
                 </span>
-                {testing ? '测试中...' : testStatus === 'ok' ? '连接成功！' : testStatus === 'fail' ? '连接失败' : '测试连接'}
+                {testing ? t('settings.testTesting') : testStatus === 'ok' ? t('settings.testOk') : testStatus === 'fail' ? t('settings.testFail') : t('settings.testConn')}
               </TestBtn>
               {testError && <HelpText style={{ color: '#F44336', marginTop: 4 }}>{testError}</HelpText>}
             </FieldGroup>
           </Section>
 
           <Section>
-            <SectionTitle>界面设置</SectionTitle>
+            <SectionTitle>{t('settings.interface')}</SectionTitle>
             <FieldGroup>
-              <Label>语言 / Language</Label>
+              <Label>{t('settings.language')}</Label>
               <Select value={language} onChange={(e) => setLanguage(e.target.value as 'en' | 'zh')}>
                 <option value="zh">中文</option>
                 <option value="en">English</option>
+              </Select>
+            </FieldGroup>
+            <FieldGroup>
+              <Label>{t('settings.theme')}</Label>
+              <Select value={themeMode} onChange={(e) => setTheme(e.target.value as 'light' | 'dark')}>
+                <option value="light">{t('settings.themeLight')}</option>
+                <option value="dark">{t('settings.themeDark')}</option>
               </Select>
             </FieldGroup>
           </Section>
         </Body>
 
         <DialogFooter>
-          <PrimaryBtn onClick={handleClose}>完成</PrimaryBtn>
+          <PrimaryBtn onClick={handleClose}>{t('settings.done')}</PrimaryBtn>
         </DialogFooter>
       </Dialog>
     </Overlay>

@@ -42,7 +42,7 @@ export interface Slide {
   notes?: string
 }
 
-export type SlideLayout = 'title' | 'content' | 'two-column' | 'feature-grid' | 'quote' | 'blank' | 'section-divider' | 'highlight' | 'image'
+export type SlideLayout = 'title' | 'content' | 'two-column' | 'feature-grid' | 'quote' | 'blank' | 'section-divider' | 'highlight' | 'image' | 'big-number' | 'timeline' | 'callout' | 'statement'
 
 export interface SlideContent {
   title: string
@@ -55,6 +55,7 @@ export interface SlideContent {
   leftBody?: string[]
   rightTitle?: string
   rightBody?: string[]
+  features?: Array<{ name: string; desc: string }>
 }
 
 export type StylePreset =

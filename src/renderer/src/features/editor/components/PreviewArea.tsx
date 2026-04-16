@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
 import katex from 'katex'
@@ -235,10 +235,10 @@ const ContentHeader = styled.div`
 
 const ContentTitle = styled.h2`
   font-family: var(--display-font);
-  font-size: clamp(14px, 2vw, 24px); font-weight: 700;
+  font-size: clamp(16px, 2.4vw, 28px); font-weight: 700;
   color: var(--content-title-color);
   @media (max-height: 600px) {
-    font-size: clamp(12px, 1.5vw, 18px);
+    font-size: clamp(14px, 1.8vw, 20px);
   }
 `
 
@@ -248,11 +248,12 @@ const ContentBody = styled.ul`
   flex: 1; min-height: 0;
   max-height: 100%;
   overflow: hidden;
+  justify-content: center;
 `
 
 const ContentBullet = styled.li`
   font-family: var(--body-font);
-  font-size: clamp(10px, 1.3vw, 16px);
+  font-size: clamp(13px, 1.8vw, 22px);
   color: var(--content-bullet-color); line-height: 1.5;
   display: flex; align-items: flex-start; gap: clamp(6px, 0.8vw, 12px);
   &::before {
@@ -263,7 +264,7 @@ const ContentBullet = styled.li`
     margin-top: clamp(4px, 0.5vw, 8px);
   }
   @media (max-height: 600px) {
-    font-size: clamp(9px, 1.1vw, 13px);
+    font-size: clamp(11px, 1.3vw, 15px);
     line-height: 1.35;
   }
 `
@@ -297,7 +298,7 @@ const TwoColCard = styled.div`
 
 const TwoColCardTitle = styled.h3`
   font-family: var(--display-font);
-  font-size: clamp(11px, 1.4vw, 18px); font-weight: 700;
+  font-size: clamp(13px, 1.7vw, 20px); font-weight: 700;
   color: var(--content-title-color);
   margin-bottom: clamp(6px, 1vh, 12px);
   padding-bottom: clamp(4px, 0.5vh, 8px);
@@ -312,7 +313,7 @@ const TwoColCardBody = styled.ul`
 
 const TwoColBullet = styled.li`
   font-family: var(--body-font);
-  font-size: clamp(9px, 1.1vw, 14px);
+  font-size: clamp(11px, 1.3vw, 16px);
   color: var(--content-bullet-color); line-height: 1.45;
   display: flex; align-items: flex-start; gap: clamp(4px, 0.5vw, 8px);
   &::before {
@@ -342,7 +343,7 @@ const HighlightBox = styled.div`
   background: var(--title-accent-bg);
   color: var(--title-accent-color);
   font-family: var(--display-font);
-  font-size: clamp(14px, 2vw, 24px); font-weight: 700;
+  font-size: clamp(16px, 2.4vw, 28px); font-weight: 700;
   padding: clamp(12px, 2vh, 24px) clamp(16px, 3vw, 40px);
   border-radius: clamp(8px, 1vw, 16px);
   margin-bottom: clamp(12px, 2vh, 24px);
@@ -358,7 +359,7 @@ const HighlightBody = styled.ul`
 
 const HighlightPill = styled.li`
   font-family: var(--body-font);
-  font-size: clamp(9px, 1vw, 13px);
+  font-size: clamp(11px, 1.2vw, 15px);
   color: var(--content-bullet-color);
   background: var(--card-bg, rgba(0,0,0,0.03));
   border: 1px solid var(--card-border, rgba(0,0,0,0.06));
@@ -414,6 +415,228 @@ const ImageCaption = styled.p`
   text-align: center;
 `
 
+/* ========== FEATURE GRID ========== */
+const FeatureGridRoot = styled.div`
+  width: 100%; height: 100%;
+  background: var(--content-bg);
+  padding: clamp(16px, 3vh, 40px) clamp(20px, 3vw, 48px);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+`
+
+const FeatureGridContainer = styled.div`
+  flex: 1; display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: clamp(8px, 1.5vw, 20px);
+  align-content: center;
+`
+
+const FeatureCard = styled.div`
+  background: rgba(128,128,128,0.04); border-radius: 12px;
+  padding: clamp(10px, 1.5vw, 20px); text-align: center;
+  border: 1px solid rgba(128,128,128,0.08);
+`
+
+const FeatureCardNumber = styled.span`
+  display: inline-flex; align-items: center; justify-content: center;
+  width: clamp(22px, 2.5vw, 32px); height: clamp(22px, 2.5vw, 32px);
+  border-radius: 50%; background: var(--title-accent-bg); color: var(--title-accent-color);
+  font-family: var(--display-font); font-size: clamp(12px, 1.4vw, 18px);
+  font-weight: 700; margin-bottom: 6px;
+`
+
+const FeatureName = styled.span`
+  font-family: var(--display-font); font-size: clamp(12px, 1.7vw, 19px);
+  color: var(--content-title-color); font-weight: 700; display: block; margin-bottom: 4px;
+`
+
+const FeatureDesc = styled.span`
+  font-family: var(--body-font); font-size: clamp(10px, 1.3vw, 16px);
+  color: var(--content-bullet-color); line-height: 1.4;
+`
+
+/* ========== QUOTE ========== */
+const QuoteRoot = styled.div`
+  width: 100%; height: 100%;
+  background: var(--title-bg);
+  padding: clamp(16px, 3vh, 40px) clamp(20px, 3vw, 48px);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  overflow: hidden; position: relative;
+`
+
+const QuoteText = styled.blockquote`
+  font-family: var(--display-font);
+  font-size: clamp(14px, 2.4vw, 28px); font-style: italic; font-weight: 500;
+  color: var(--title-color); line-height: 1.5; max-width: 90%;
+  position: relative; padding-left: 16px;
+  border-left: 3px solid var(--title-accent-bg);
+`
+
+const QuoteAttribution = styled.p`
+  margin-top: clamp(8px, 1.5vh, 16px);
+  font-family: var(--body-font);
+  font-size: clamp(11px, 1.4vw, 17px);
+  color: var(--title-subtitle-color);
+`
+
+/* ========== BIG NUMBER ========== */
+const BigNumberRoot = styled.div`
+  width: 100%; height: 100%;
+  background: var(--content-bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; position: relative;
+  padding: clamp(16px, 3vh, 32px);
+`
+
+const BigNumberValue = styled.div`
+  font-family: var(--display-font);
+  font-size: clamp(48px, 10vw, 96px);
+  color: var(--title-accent-bg);
+  line-height: 1; font-weight: 900;
+`
+
+const BigNumberLabel = styled.div`
+  font-family: var(--body-font);
+  font-size: clamp(15px, 2.2vw, 24px);
+  color: var(--content-title-color);
+  margin-top: 8px; font-weight: 600;
+`
+
+const BigNumberPills = styled.div`
+  display: flex; gap: 8px; justify-content: center;
+  flex-wrap: wrap; margin-top: clamp(10px, 2vh, 20px);
+`
+
+const BigNumberPill = styled.div`
+  padding: 6px 16px; border-radius: 20px;
+  font-size: clamp(11px, 1.2vw, 15px); font-family: var(--body-font);
+  color: var(--content-bullet-color);
+  background: rgba(128,128,128,0.06);
+  border: 1px solid rgba(128,128,128,0.1);
+`
+
+/* ========== TIMELINE ========== */
+const TimelineRoot = styled.div`
+  width: 100%; height: 100%;
+  background: var(--content-bg);
+  padding: clamp(16px, 3vh, 40px) clamp(20px, 3vw, 48px);
+  display: flex; flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  @media (max-height: 600px) {
+    padding: clamp(8px, 2vh, 20px) clamp(12px, 2vw, 32px);
+  }
+`
+
+const TimelineBody = styled.div`
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: clamp(12px, 2vh, 24px) clamp(20px, 4vw, 48px);
+  position: relative;
+`
+
+const TimelineLine = styled.div`
+  position: absolute; top: 50%; left: 10%; right: 10%; height: 3px;
+  background: rgba(128,128,128,0.15); transform: translateY(-50%);
+`
+
+const TimelineNodes = styled.div`
+  display: flex; justify-content: space-between; width: 80%; position: relative; z-index: 1;
+`
+
+const TimelineNodeWrap = styled.div`
+  text-align: center; width: 18%;
+`
+
+const TimelineCircle = styled.div`
+  width: clamp(26px, 4vw, 42px); height: clamp(26px, 4vw, 42px);
+  border-radius: 50%; background: var(--title-accent-bg); color: var(--title-accent-color);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display-font); font-size: clamp(13px, 1.6vw, 19px);
+  font-weight: 700; margin: 0 auto clamp(6px, 1.2vh, 12px);
+`
+
+const TimelineTitle = styled.div`
+  font-family: var(--body-font); font-size: clamp(11px, 1.3vw, 15px);
+  font-weight: 700; color: var(--content-title-color); margin-bottom: 3px;
+`
+
+const TimelineDesc = styled.div`
+  font-family: var(--body-font); font-size: clamp(10px, 1.1vw, 13px);
+  color: var(--content-bullet-color); line-height: 1.4;
+`
+
+/* ========== CALLOUT ========== */
+const CalloutRoot = styled.div`
+  width: 100%; height: 100%;
+  background: var(--content-bg);
+  padding: clamp(16px, 3vh, 40px) clamp(20px, 3vw, 48px);
+  display: flex; flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  @media (max-height: 600px) {
+    padding: clamp(8px, 2vh, 20px) clamp(12px, 2vw, 32px);
+  }
+`
+
+const CalloutBody = styled.div`
+  flex: 1; display: flex; gap: clamp(10px, 1.5vw, 20px);
+  padding: clamp(6px, 1vh, 12px) clamp(20px, 4vw, 48px) clamp(12px, 2vh, 24px);
+`
+
+const CalloutMain = styled.div`
+  flex: 7; display: flex; flex-direction: column; justify-content: center;
+`
+
+const CalloutSidebar = styled.div`
+  flex: 3; background: var(--title-accent-bg); border-radius: 12px;
+  padding: clamp(12px, 2vw, 24px);
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+  color: var(--title-accent-color);
+`
+
+const CalloutLabel = styled.div`
+  font-size: clamp(10px, 1vw, 12px); font-weight: 700;
+  opacity: 0.7; text-transform: uppercase;
+  letter-spacing: 1.5px; margin-bottom: clamp(6px, 1vh, 12px);
+  font-family: var(--body-font);
+`
+
+const CalloutText = styled.div`
+  font-family: var(--display-font); font-size: clamp(14px, 2vw, 22px);
+  font-weight: 700; line-height: 1.5;
+`
+
+/* ========== STATEMENT ========== */
+const StatementRoot = styled.div`
+  width: 100%; height: 100%;
+  background: var(--title-bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; position: relative;
+  padding: clamp(20px, 4vh, 40px);
+  overflow: hidden;
+`
+
+const StatementText = styled.div`
+  font-family: var(--display-font);
+  font-size: clamp(20px, 3.8vw, 40px);
+  color: var(--title-color); line-height: 1.35; font-weight: 800;
+  max-width: 85%;
+`
+
+const StatementAccent = styled.div`
+  width: clamp(30px, 8vw, 60px); height: 3px;
+  background: var(--title-accent-bg);
+  margin: clamp(10px, 2vh, 20px) auto 0;
+`
+
+const StatementAttr = styled.div`
+  font-size: clamp(10px, 1.2vw, 14px); color: var(--title-subtitle-color);
+  margin-top: clamp(6px, 1.2vh, 14px); font-family: var(--body-font);
+`
+
 /* ========== NOTES ========== */
 const SlideNotes = styled.div`
   position: absolute; bottom: 8px; left: 12px; right: 12px;
@@ -421,6 +644,49 @@ const SlideNotes = styled.div`
   color: var(--content-notes-color); font-style: italic;
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   font-family: var(--body-font);
+`
+
+/* ========== FULLSCREEN OVERLAY ========== */
+const FullscreenOverlay = styled.div`
+  position: fixed; inset: 0; z-index: 9999;
+  background: #111;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  animation: fadeIn 0.25s ease;
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+`
+
+const FullscreenWrapper = styled.div`
+  overflow: hidden;
+  /* size & transform set via inline style to fit viewport */
+`
+
+const FullscreenCanvas = styled.div`
+  width: 960px; height: 540px;
+  overflow: hidden; position: relative;
+  font-family: var(--body-font);
+  transform-origin: top left;
+`
+
+const FullscreenControls = styled.div`
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  padding: 8px 20px; border-radius: 28px;
+  opacity: 0; transition: opacity 0.3s;
+  &:hover { opacity: 1; }
+`
+
+const FullscreenCounter = styled.span`
+  color: #fff; font-size: 13px; font-weight: 500; min-width: 60px; text-align: center;
+`
+
+const FullscreenBtn = styled.button`
+  width: 36px; height: 36px; border: none; background: rgba(255,255,255,0.1);
+  border-radius: 50%; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+  &:hover { background: rgba(255,255,255,0.2); }
 `
 
 /* ========== THUMBNAILS ========== */
@@ -432,7 +698,7 @@ const ThumbStrip = styled.div`
 `
 
 const ThumbItem = styled.div<{ active?: boolean }>`
-  width: 96px; flex-shrink: 0; cursor: pointer;
+  width: 96px; height: 54px; flex-shrink: 0; cursor: pointer;
   transition: all ${({ theme }) => theme.transition};
   border: 2px solid ${({ active, theme }) => active ? theme.colors.primary : 'transparent'};
   border-radius: 6px; overflow: hidden;
@@ -441,27 +707,10 @@ const ThumbItem = styled.div<{ active?: boolean }>`
   &:hover { border-color: ${({ theme }) => theme.colors.primaryLight}; }
 `
 
-const ThumbInner = styled.div<{ isTitle?: boolean; isDivider?: boolean; isHighlight?: boolean }>`
-  width: 100%; aspect-ratio: 16/9; overflow: hidden;
-  padding: 4px 5px;
-  background: ${({ isTitle, isDivider, isHighlight }) =>
-    isTitle || isDivider ? 'linear-gradient(135deg,#1a1a1a,#2d2d2d)' :
-    isHighlight ? '#f0f0f0' : '#fff'};
-`
-
-const ThumbTitle = styled.div`
-  font-size: 5px; font-weight: 700; color: #fff;
-  line-height: 1.3; overflow: hidden;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-`
-
-const ThumbContentTitle = styled.div`
-  font-size: 4px; font-weight: 600; color: #1A1A2E; margin-bottom: 2px;
-  border-bottom: 1px solid #E6E6F0; padding-bottom: 1px;
-`
-
-const ThumbBullet = styled.div`
-  height: 2px; background: #E6E6F0; border-radius: 1px; margin-bottom: 1.5px;
+const ThumbInner = styled.div`
+  width: 960px; height: 540px; overflow: hidden;
+  transform: scale(0.1); transform-origin: top left;
+  pointer-events: none;
 `
 
 const ThumbNum = styled.span`
@@ -578,6 +827,102 @@ function SlideRenderer({ slide, slideIndex, totalSlides }: { slide: any; slideIn
     )
   }
 
+  if (layout === 'feature-grid') {
+    const features = (content as any).features || []
+    return (
+      <FeatureGridRoot>
+        <ContentHeader>
+          <ContentTitle>{content.title}</ContentTitle>
+        </ContentHeader>
+        <FeatureGridContainer>
+          {features.map((f: { name: string; desc: string }, i: number) => (
+            <FeatureCard key={i}>
+              <FeatureCardNumber>{i + 1}</FeatureCardNumber>
+              <FeatureName>{f.name}</FeatureName>
+              <FeatureDesc>{f.desc}</FeatureDesc>
+            </FeatureCard>
+          ))}
+        </FeatureGridContainer>
+        {content.notes && <SlideNotes>{content.notes}</SlideNotes>}
+      </FeatureGridRoot>
+    )
+  }
+
+  if (layout === 'quote') {
+    return (
+      <QuoteRoot>
+        <QuoteText>{content.highlight ? <MathText text={content.highlight} /> : ''}</QuoteText>
+        {content.title && <QuoteAttribution>— {content.title}</QuoteAttribution>}
+      </QuoteRoot>
+    )
+  }
+
+  if (layout === 'big-number') {
+    return (
+      <BigNumberRoot>
+        <BigNumberValue>{content.highlight || '100%'}</BigNumberValue>
+        <BigNumberLabel>{content.title}</BigNumberLabel>
+        {(content.body && content.body.length > 0) && (
+          <BigNumberPills>
+            {content.body.map((b: string, i: number) => <BigNumberPill key={i}>{b}</BigNumberPill>)}
+          </BigNumberPills>
+        )}
+      </BigNumberRoot>
+    )
+  }
+
+  if (layout === 'timeline') {
+    const features = (content as any).features || []
+    return (
+      <TimelineRoot>
+        <ContentHeader><ContentTitle>{content.title}</ContentTitle></ContentHeader>
+        <TimelineBody>
+          <TimelineLine />
+          <TimelineNodes>
+            {features.map((f: { name: string; desc: string }, i: number) => (
+              <TimelineNodeWrap key={i}>
+                <TimelineCircle>{i + 1}</TimelineCircle>
+                <TimelineTitle>{f.name}</TimelineTitle>
+                <TimelineDesc>{f.desc}</TimelineDesc>
+              </TimelineNodeWrap>
+            ))}
+          </TimelineNodes>
+        </TimelineBody>
+      </TimelineRoot>
+    )
+  }
+
+  if (layout === 'callout') {
+    return (
+      <CalloutRoot>
+        <ContentHeader><ContentTitle>{content.title}</ContentTitle></ContentHeader>
+        <CalloutBody>
+          <CalloutMain>
+            <ContentBody>
+              {(content.body || []).map((b: string, i: number) => (
+                <ContentBullet key={i}><MathText text={b} /></ContentBullet>
+              ))}
+            </ContentBody>
+          </CalloutMain>
+          <CalloutSidebar>
+            <CalloutLabel>{content.accent || '核心概念'}</CalloutLabel>
+            <CalloutText>{content.highlight ? <MathText text={content.highlight} /> : ''}</CalloutText>
+          </CalloutSidebar>
+        </CalloutBody>
+      </CalloutRoot>
+    )
+  }
+
+  if (layout === 'statement') {
+    return (
+      <StatementRoot>
+        <StatementText>{content.highlight || content.title}</StatementText>
+        <StatementAccent />
+        {content.title && content.highlight && <StatementAttr>— {content.title}</StatementAttr>}
+      </StatementRoot>
+    )
+  }
+
   // Default: content
   return (
     <ContentRoot>
@@ -605,8 +950,37 @@ export function PreviewArea() {
   const setSelectedStyle = useProjectStore((s) => s.setSelectedStyle)
   const addSlide = useProjectStore((s) => s.addSlide)
   const prevSlideRef = useRef(activeSlideIndex)
+  const thumbStripRef = useRef<HTMLDivElement>(null)
+  const activeThumbRef = useRef<HTMLDivElement>(null)
   const slideDirection = activeSlideIndex >= prevSlideRef.current ? 1 : -1
   useEffect(() => { prevSlideRef.current = activeSlideIndex }, [activeSlideIndex])
+
+  // Auto-scroll thumbnail strip to active slide
+  useEffect(() => {
+    if (activeThumbRef.current && thumbStripRef.current) {
+      activeThumbRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+    }
+  }, [activeSlideIndex])
+
+  const [fullscreen, setFullscreen] = useState(false)
+  const [fsScale, setFsScale] = useState(1)
+  const fullscreenRef = useRef(false)
+
+  // Keep ref in sync for resize listener
+  fullscreenRef.current = fullscreen
+
+  useEffect(() => {
+    const calcScale = () => {
+      const scaleX = window.innerWidth / 960
+      const scaleY = window.innerHeight / 540
+      setFsScale(Math.min(scaleX, scaleY))
+    }
+    if (fullscreen) {
+      calcScale()
+      window.addEventListener('resize', calcScale)
+      return () => window.removeEventListener('resize', calcScale)
+    }
+  }, [fullscreen])
 
   const style = selectedStyle || 'bold-signal'
   const styleConfig = getStyleConfig(style)
@@ -680,6 +1054,26 @@ export function PreviewArea() {
     syncOutlineFromSlide(idx)
   }
 
+  // ESC / arrow keys in fullscreen
+  useEffect(() => {
+    if (!fullscreen) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFullscreen(false)
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault()
+        const next = activeSlideIndex + 1
+        if (next < totalSlides) syncOutlineFromSlide(next)
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault()
+        const prev = activeSlideIndex - 1
+        if (prev >= 0) syncOutlineFromSlide(prev)
+      }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [fullscreen, activeSlideIndex, totalSlides, syncOutlineFromSlide])
+
   const handleInsertImage = async () => {
     const result = await window.api.file.openImage()
     if (!result) return
@@ -707,14 +1101,6 @@ export function PreviewArea() {
     }
   }, [activeSlideIndex, totalSlides, syncOutlineFromSlide])
 
-  const getThumbVariant = (slide: any) => {
-    const l = slide.layout
-    if (l === 'title') return { isTitle: true, isDivider: false, isHighlight: false }
-    if (l === 'section-divider') return { isTitle: false, isDivider: true, isHighlight: false }
-    if (l === 'highlight') return { isTitle: false, isDivider: false, isHighlight: true }
-    return { isTitle: false, isDivider: false, isHighlight: false }
-  }
-
   return (
     <Area>
       <PreviewToolbar>
@@ -732,7 +1118,7 @@ export function PreviewArea() {
           <GhostBtn title={t('editor.insertImage')} disabled>
             <span className="material-icons-round" style={{ fontSize: 16, opacity: 0.35 }}>add_photo_alternate</span>
           </GhostBtn>
-          <GhostBtn>
+          <GhostBtn onClick={() => setFullscreen(true)}>
             <span className="material-icons-round" style={{ fontSize: 16 }}>fullscreen</span>
           </GhostBtn>
         </Controls>
@@ -746,28 +1132,44 @@ export function PreviewArea() {
         </SlideCanvas>
       </SlideMain>
 
-      <ThumbStrip>
-        {slides.map((slide, i) => {
-          const v = getThumbVariant(slide)
-          return (
-            <ThumbItem key={slide.id} active={activeSlideIndex === i} onClick={() => handleThumbClick(i)}>
-              <ThumbInner {...v}>
-                {v.isTitle || v.isDivider ? (
-                  <ThumbTitle>{slide.content.title}</ThumbTitle>
-                ) : (
-                  <>
-                    <ThumbContentTitle>{slide.content.title}</ThumbContentTitle>
-                    {(slide.content.body || []).slice(0, 4).map((_, j) => (
-                      <ThumbBullet key={j} style={{ width: `${60 + Math.random() * 30}%` }} />
-                    ))}
-                  </>
-                )}
-              </ThumbInner>
-              <ThumbNum style={v.isTitle || v.isDivider ? {} : { color: '#666', background: '#f0f0f0' }}>{i + 1}</ThumbNum>
-            </ThumbItem>
-          )
-        })}
+      <ThumbStrip ref={thumbStripRef}>
+        {slides.map((slide, i) => (
+          <ThumbItem key={slide.id} ref={(el) => { if (i === activeSlideIndex) activeThumbRef.current = el }} active={activeSlideIndex === i} onClick={() => handleThumbClick(i)}>
+            <ThumbInner style={cssVars}>
+              <SlideRenderer slide={slide} slideIndex={i} totalSlides={totalSlides} />
+            </ThumbInner>
+            <ThumbNum>{i + 1}</ThumbNum>
+          </ThumbItem>
+        ))}
       </ThumbStrip>
+
+      {fullscreen && (
+        <FullscreenOverlay onClick={() => setFullscreen(false)} onWheel={(e) => {
+          e.stopPropagation()
+          if (e.deltaY > 0 && activeSlideIndex < totalSlides - 1) syncOutlineFromSlide(activeSlideIndex + 1)
+          else if (e.deltaY < 0 && activeSlideIndex > 0) syncOutlineFromSlide(activeSlideIndex - 1)
+        }}>
+          <FullscreenWrapper style={{ width: 960 * fsScale, height: 540 * fsScale }} onClick={(e) => e.stopPropagation()}>
+            <FullscreenCanvas style={{ ...cssVars, transform: `scale(${fsScale})` }}>
+              <SlideTransition key={activeSlideIndex} direction={slideDirection}>
+                <SlideRenderer slide={currentSlide} slideIndex={activeSlideIndex} totalSlides={totalSlides} />
+              </SlideTransition>
+            </FullscreenCanvas>
+          </FullscreenWrapper>
+          <FullscreenControls onClick={(e) => e.stopPropagation()}>
+            <FullscreenBtn onClick={() => syncOutlineFromSlide(activeSlideIndex - 1)} disabled={activeSlideIndex === 0}>
+              <span className="material-icons-round" style={{ fontSize: 20 }}>chevron_left</span>
+            </FullscreenBtn>
+            <FullscreenCounter>{activeSlideIndex + 1} / {totalSlides}</FullscreenCounter>
+            <FullscreenBtn onClick={() => syncOutlineFromSlide(activeSlideIndex + 1)} disabled={activeSlideIndex === totalSlides - 1}>
+              <span className="material-icons-round" style={{ fontSize: 20 }}>chevron_right</span>
+            </FullscreenBtn>
+            <FullscreenBtn onClick={() => setFullscreen(false)}>
+              <span className="material-icons-round" style={{ fontSize: 20 }}>close</span>
+            </FullscreenBtn>
+          </FullscreenControls>
+        </FullscreenOverlay>
+      )}
     </Area>
   )
 }

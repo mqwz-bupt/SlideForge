@@ -148,7 +148,7 @@ export function TopicStep({ onNext }: TopicStepProps) {
       <UploadRow>
         <UploadBtn onClick={handleUpload}>
           <span className="material-icons-round" style={{ fontSize: 16 }}>upload_file</span>
-          Upload TXT / MD
+          {t('wizard.uploadBtn')}
         </UploadBtn>
         {fileName && <FileName>
           <span className="material-icons-round" style={{ fontSize: 13 }}>description</span>

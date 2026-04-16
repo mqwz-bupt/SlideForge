@@ -119,11 +119,13 @@ const ExportItem = styled.button`
 `
 
 export function Toolbar() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const currentProject = useProjectStore((s) => s.currentProject)
   const setCurrentView = useAppStore((s) => s.setCurrentView)
   const setSettingsOpen = useSettingsStore((s) => s.setSettingsOpen)
+  const language = useSettingsStore((s) => s.language)
+  const setLanguage = useSettingsStore((s) => s.setLanguage)
   const [exportOpen, setExportOpen] = useState(false)
   const [exporting, setExporting] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -214,6 +216,14 @@ export function Toolbar() {
         )}
       </ExportWrapper>
       <Divider />
+      <ToolbarBtn variant="ghost" onClick={() => {
+        const next = language === 'zh' ? 'en' : 'zh'
+        setLanguage(next)
+        i18n.changeLanguage(next)
+      }}>
+        <span className="material-icons-round" style={{ fontSize: 18 }}>translate</span>
+        {language === 'zh' ? 'EN' : '中'}
+      </ToolbarBtn>
       <ToolbarBtn variant="ghost" onClick={() => setSettingsOpen(true)}>
         <span className="material-icons-round" style={{ fontSize: 18 }}>settings</span>
       </ToolbarBtn>

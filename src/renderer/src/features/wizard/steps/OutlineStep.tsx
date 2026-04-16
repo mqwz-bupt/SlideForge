@@ -238,12 +238,18 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
     return data.sections.map((s: any, i: number) => ({
       id: `s${i + 1}`,
       order: s.order || i + 1,
-      title: s.title,
-      points: (s.points || []).map((p: string, j: number) => ({
-        id: `p-${i}-${j}`,
-        content: p,
-        type: 'bullet' as const
-      }))
+      title: typeof s.title === 'string' ? s.title.replace(/[|`#*\[\]]/g, '').trim().slice(0, 40) : `章节${i + 1}`,
+      points: (s.points || []).map((p: string, j: number) => {
+        // Clean and truncate each point to keep outline concise
+        const cleaned = typeof p === 'string'
+          ? p.replace(/[|`#*\[\]]/g, ' ').replace(/\s{2,}/g, ' ').trim()
+          : String(p)
+        return {
+          id: `p-${i}-${j}`,
+          content: cleaned.length > 30 ? cleaned.slice(0, 28) + '…' : cleaned,
+          type: 'bullet' as const
+        }
+      })
     }))
   }
 
@@ -259,6 +265,18 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
     }
 
     try {
+      // Build scope-specific instructions
+      const scopeHints: Record<string, string> = {
+        'Core Concepts': '包含1-2个章节介绍基本定义、核心原理和关键术语',
+        'Technical Analysis': '包含1-2个章节深入技术细节、公式推导、数据分析',
+        'Comparisons': '包含1个章节做对比分析（不同方法/方案的优劣对比）',
+        'Applications & Examples': '包含1个章节展示实际应用场景和具体案例'
+      }
+      const scopeGuidance = selectedScopes
+        .map(s => scopeHints[s] || '')
+        .filter(Boolean)
+        .join('；')
+
       const messages = isDocumentPath
         ? [
             {
@@ -294,13 +312,15 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
 - 每个 point 必须是具体、有实质内容的知识点（不能是空泛的套话）
 - 目标 4-6 个 section，每个 section 2-4 个 point
 - title 字段给出演示文稿的正式标题
-- 内容范围应侧重于：${selectedScopes.join('、')}
+
+用户选择的内容范围：${selectedScopes.join('、')}
+请确保大纲结构覆盖这些方向——${scopeGuidance}。如果只选了1-2个范围，侧重展开；如果选了3-4个，均衡分配。
 
 输出格式（严格遵守）：
 {"title":"演示文稿标题","sections":[{"order":1,"title":"章节标题","points":["要点1","要点2","要点3"]}],"estimatedMinutes":15}
 
-示例（以"人工智能导论"为主题）：
-{"title":"人工智能导论","sections":[{"order":1,"title":"人工智能概述","points":["AI的定义与研究范畴","图灵测试与强/弱AI","AI发展历程与关键里程碑"]},{"order":2,"title":"机器学习基础","points":["监督学习与无监督学习区别","常见算法：决策树、SVM、神经网络","模型评估：过拟合与交叉验证"]}]}`
+示例（以"人工智能导论"为主题，范围：Core Concepts, Applications & Examples）：
+{"title":"人工智能导论","sections":[{"order":1,"title":"人工智能概述","points":["AI的定义与研究范畴","图灵测试与强/弱AI","AI发展历程与关键里程碑"]},{"order":2,"title":"机器学习基础","points":["监督学习与无监督学习区别","常见算法：决策树、SVM、神经网络","模型评估：过拟合与交叉验证"]},{"order":3,"title":"AI应用场景","points":["自然语言处理：机器翻译与对话系统","计算机视觉：图像识别与自动驾驶","智能推荐与个性化系统"]},{"order":4,"title":"典型案例分析","points":["ChatGPT：大语言模型的突破","AlphaFold：蛋白质结构预测","特斯拉FSD：端到端自动驾驶架构"]}]}`
             },
             {
               role: 'user' as const,
@@ -444,7 +464,7 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
         <Subtitle>{t('wizard.outlineGenerating')}</Subtitle>
         <Spinner />
         <p style={{ textAlign: 'center', fontSize: 13, color: '#999' }}>
-          {isDocumentPath ? uploadedFileName : topic}
+          {isDocumentPath ? uploadedFileName : (topic.length > 60 ? topic.slice(0, 58) + '…' : topic)}
         </p>
       </Inner>
     )

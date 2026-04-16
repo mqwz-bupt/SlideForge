@@ -26,9 +26,15 @@ export async function generatePDF(project: ProjectData): Promise<Buffer> {
       content: `
         html { scroll-snap-type: none !important; scroll-behavior: auto !important; }
         html, body { height: auto !important; overflow: visible !important; }
-        .slide { page-break-after: always; break-after: page; }
+        .slide {
+          height: 100vh !important; width: 100vw !important;
+          page-break-after: always; break-after: page;
+          overflow: hidden !important;
+        }
         .slide:last-child { page-break-after: auto; }
         .progress-container, .nav-dots, .keyboard-hint { display: none !important; }
+        .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+        .slide-bg-number, .slide-corner-accent, .slide-accent-bar { display: block; }
       `
     })
 
@@ -36,8 +42,9 @@ export async function generatePDF(project: ProjectData): Promise<Buffer> {
     await page.emulateMedia({ media: 'screen' })
 
     const pdfBuffer = await page.pdf({
-      format: 'A4',
-      landscape: true,
+      // Use custom dimensions matching the viewport so each slide fills exactly one page
+      width: '1280px',
+      height: '720px',
       printBackground: true,
       margin: { top: '0', bottom: '0', left: '0', right: '0' }
     })

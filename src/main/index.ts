@@ -109,7 +109,7 @@ app.whenReady().then(() => {
         defaultPath: `${project.name || 'presentation'}.pptx`
       })
       if (result.canceled || !result.filePath) return { success: false, error: 'Cancelled' }
-      const buffer = generatePPTX(project)
+      const buffer = await generatePPTX(project)
       await writeFile(result.filePath, buffer)
       return { success: true, path: result.filePath }
     } catch (err: any) {

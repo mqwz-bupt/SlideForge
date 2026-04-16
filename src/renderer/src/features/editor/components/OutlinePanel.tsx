@@ -105,6 +105,14 @@ const PointText = styled.span<{ active?: boolean }>`
   line-height: 1.4;
 `
 
+const PointDeleteBtn = styled.button`
+  width: 16px; height: 16px; border: none; background: none;
+  border-radius: 3px; color: ${({ theme }) => theme.colors.textMuted};
+  display: none; align-items: center; justify-content: center; flex-shrink: 0;
+  &:hover { background: rgba(244,67,54,0.1); color: #F44336; }
+  ${PointItem}:hover & { display: flex; }
+`
+
 const CollapsedPoints = styled.div`
   padding: 2px 4px 2px 24px;
   font-size: 10px; color: ${({ theme }) => theme.colors.textMuted};
@@ -126,9 +134,20 @@ export function OutlinePanel() {
   const updateSectionTitle = useProjectStore((s) => s.updateSectionTitle)
   const addSection = useProjectStore((s) => s.addSection)
   const deleteSection = useProjectStore((s) => s.deleteSection)
+  const deletePoint = useProjectStore((s) => s.deletePoint)
   const moveSectionUp = useProjectStore((s) => s.moveSectionUp)
   const moveSectionDown = useProjectStore((s) => s.moveSectionDown)
   const toggleSectionCollapse = useProjectStore((s) => s.toggleSectionCollapse)
+
+  const listRef = useRef<HTMLDivElement>(null)
+  const activeCardRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll outline to active section
+  useEffect(() => {
+    if (activeCardRef.current && listRef.current) {
+      activeCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [activeSectionId, activePointIndex])
 
   if (!project) {
     return (
@@ -181,10 +200,11 @@ export function OutlinePanel() {
           </ActionBtn>
         </Actions>
       </Header>
-      <List>
+      <List ref={listRef}>
         {sections.map((section, idx) => (
           <SectionCard
             key={section.id}
+            ref={(el) => { if (activeSectionId === section.id) activeCardRef.current = el }}
             active={activeSectionId === section.id}
             onClick={() => handleSectionClick(section.id)}
           >
@@ -230,6 +250,13 @@ export function OutlinePanel() {
                     >
                       <PointDot active={isActive} />
                       <PointText active={isActive}>{point.content}</PointText>
+                      <PointDeleteBtn title="Delete point" onClick={(e) => {
+                        e.stopPropagation()
+                        deletePoint(section.id, point.id)
+                        if (isActive) setActivePointIndex(null)
+                      }}>
+                        <span className="material-icons-round" style={{ fontSize: 11 }}>close</span>
+                      </PointDeleteBtn>
                     </PointItem>
                   )
                 })}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -124,6 +124,103 @@ const Bottom = styled.div`
   padding: 8px 12px;
 `
 
+// ── About Dialog ──
+
+const AboutOverlay = styled.div`
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+`
+
+const AboutCard = styled.div`
+  background: ${({ theme }) => theme.colors.surface};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  width: 380px; padding: 32px;
+  text-align: center;
+  animation: slideUp 0.25s ease;
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+`
+
+const AboutLogo = styled.div`
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, #6750A4, #9A82DB);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 28px;
+  margin: 0 auto 16px;
+`
+
+const AboutName = styled.h2`
+  font-size: 20px; font-weight: 700;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  margin-bottom: 4px;
+`
+
+const AboutVersion = styled.div`
+  font-size: 12px; color: ${({ theme }) => theme.colors.textMuted};
+  margin-bottom: 20px;
+`
+
+const AboutDivider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => theme.colors.border};
+  margin: 16px 0;
+`
+
+const AboutSection = styled.div`
+  font-size: 12px; color: ${({ theme }) => theme.colors.textSecondary};
+  line-height: 1.8; text-align: left;
+`
+
+const AboutLabel = styled.span`
+  color: ${({ theme }) => theme.colors.textMuted};
+  margin-right: 6px;
+`
+
+const AboutCloseBtn = styled.button`
+  margin-top: 20px;
+  padding: 8px 24px;
+  background: ${({ theme }) => theme.colors.primary};
+  color: #fff; border: none;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all ${({ theme }) => theme.transition};
+  &:hover { opacity: 0.9; }
+`
+
+function AboutDialog({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <AboutOverlay onClick={onClose}>
+      <AboutCard onClick={(e) => e.stopPropagation()}>
+        <AboutLogo>S</AboutLogo>
+        <AboutName>SlideForge</AboutName>
+        <AboutVersion>{t('about.version')} 1.0.0</AboutVersion>
+        <AboutDivider />
+        <AboutSection>
+          <div><AboutLabel>{t('about.techStack')}:</AboutLabel>Electron + React 18 + TypeScript</div>
+          <div><AboutLabel>{t('about.aiEngine')}:</AboutLabel>DeepSeek / 通义千问 / GLM-4</div>
+          <div><AboutLabel>{t('about.exportFormats')}:</AboutLabel>HTML / PPTX / PDF</div>
+          <div><AboutLabel>{t('about.styles')}:</AboutLabel>12 {t('about.stylePresets')}</div>
+          <div><AboutLabel>{t('about.layouts')}:</AboutLabel>12 {t('about.layoutTypes')}</div>
+        </AboutSection>
+        <AboutDivider />
+        <AboutSection style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: 600, color: '#6750A4', marginBottom: 4 }}>{t('about.teamTitle')}</div>
+          <div>{t('about.teamMembers')}</div>
+        </AboutSection>
+        <AboutCloseBtn onClick={onClose}>{t('about.close')}</AboutCloseBtn>
+      </AboutCard>
+    </AboutOverlay>
+  )
+}
+
 export function Sidebar() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -138,6 +235,7 @@ export function Sidebar() {
   const resetWizardState = useProjectStore((s) => s.resetWizardState)
   const loadProjectById = useProjectStore((s) => s.loadProjectById)
   const loadRecentProjects = useProjectStore((s) => s.loadRecentProjects)
+  const [aboutOpen, setAboutOpen] = useState(false)
 
   // Load recent projects on mount
   useEffect(() => {
@@ -212,11 +310,12 @@ export function Sidebar() {
           <span className="material-icons-round" style={{ fontSize: 18, opacity: 0.7 }}>settings</span>
           {t('sidebar.settings')}
         </SidebarItem>
-        <SidebarItem>
+        <SidebarItem onClick={() => setAboutOpen(true)}>
           <span className="material-icons-round" style={{ fontSize: 18, opacity: 0.7 }}>info</span>
           {t('sidebar.about')}
         </SidebarItem>
       </Bottom>
+      {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
     </SidebarRoot>
   )
 }

@@ -141,6 +141,54 @@ function repairJSON(json: string): string {
   return result
 }
 
+/** Strip any markdown formatting artifacts from a string */
+function cleanText(s: string): string {
+  if (typeof s !== 'string') return s
+  return s
+    // Remove markdown table rows: |---|---| or |------|
+    .replace(/^\|?[-:\s|]+\|?$/gm, '')
+    // Remove table cell pipes but keep content: | text | → text
+    .replace(/\|\s*/g, ' ')
+    .replace(/\s*\|/g, ' ')
+    // Remove code block markers
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/```/g, '')
+    // Remove bold/italic markers
+    .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+    // Remove inline code backticks
+    .replace(/`([^`]+)`/g, '$1')
+    // Remove heading markers
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove excess whitespace
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+/** Clean all string fields in a slide object */
+function cleanSlideStrings(slide: any): any {
+  const truncate = (s: string, max: number) => {
+    const c = cleanText(s)
+    return c.length > max ? c.slice(0, max - 1) + '…' : c
+  }
+  const result: any = {}
+  for (const [k, v] of Object.entries(slide)) {
+    if (k === 'body' || k === 'leftBody' || k === 'rightBody') {
+      result[k] = Array.isArray(v) ? v.map((item: any) => typeof item === 'string' ? truncate(item, 40) : item) : v
+    } else if (k === 'features' && Array.isArray(v)) {
+      result[k] = v.map((f: any) => ({
+        ...f,
+        name: typeof f.name === 'string' ? truncate(f.name, 20) : f.name,
+        desc: typeof f.desc === 'string' ? truncate(f.desc, 30) : f.desc
+      }))
+    } else if (typeof v === 'string') {
+      result[k] = k === 'title' || k === 'subtitle' ? truncate(v, 50) : truncate(v, 60)
+    } else {
+      result[k] = v
+    }
+  }
+  return result
+}
+
 /** Extract JSON from AI response (handles markdown code blocks + repair) */
 function extractJSON(text: string): string {
   let raw = ''
@@ -197,13 +245,13 @@ export function GeneratingStep() {
     const config = getAIConfig()
     if (!config.apiKey) {
       setPhase('error')
-      setErrorMsg('请先在设置中配置 API Key')
+      setErrorMsg(t('wizard.noApiKey'))
       return
     }
 
     if (!documentOutline) {
       setPhase('error')
-      setErrorMsg('没有大纲数据，请返回确认大纲后再试')
+      setErrorMsg(t('wizard.noOutline'))
       return
     }
 
@@ -223,7 +271,7 @@ export function GeneratingStep() {
         {
           role: 'system' as const,
           content: `你是一位演示文稿生成器。为大纲生成封面页和每个章节的分隔页。
-只输出合法 JSON，不要其他文字。内容用中文。
+只输出合法 JSON，不要其他文字。内容用中文。所有文本必须是纯文字，不含markdown格式标记。
 sectionId 必须用以下 id：
 ${sectionIdList}
 
@@ -238,7 +286,7 @@ ${sectionIdList}
 
       const batch1Result = await window.api.ai.chat(config, batch1Messages, { temperature: 0.7, max_tokens: 2048 })
       const batch1Data = JSON.parse(extractJSON(batch1Result.content))
-      const structureSlides: any[] = batch1Data.slides || []
+      const structureSlides: any[] = (batch1Data.slides || []).map(cleanSlideStrings)
 
       console.log(`[Batch1] Title + dividers: ${structureSlides.length} slides`)
 
@@ -252,31 +300,92 @@ ${sectionIdList}
       const batch2Messages = [
         {
           role: 'system' as const,
-          content: `你是一位演示文稿生成器。我会给你按章节分组的知识点列表，为每个知识点生成一张幻灯片。
+          content: `你是一位专业演示文稿设计师。我会给你按章节分组的知识点列表，为每个知识点生成一张幻灯片。
 只输出合法 JSON，不要其他文字。内容用中文，要具体有信息量。
 
-每个知识点对应一张幻灯片，根据内容选最合适的 layout：
-- "content"：概念/原理讲解 → title 是知识点，body 是 3-4 个展开细节（每条不超过25字）
-- "two-column"：涉及对比/分类 → title + leftTitle/leftBody + rightTitle/rightBody
-- "highlight"：核心公式/关键结论 → title + highlight（金句/公式）+ body（2-3个补充）
+## 绝对禁止：
+1. 不要在输出中包含 markdown 表格语法（|、---等）、代码块（\`\`\`）、HTML标签
+2. 不要原样复制输入内容，必须用自己的话提炼为简洁要点
+3. 所有 title、body、highlight 等文本字段必须是纯文本，不含任何格式标记
+4. body 中每条文字不超过25个字，要精炼有力，不是完整长句
 
-**数学公式必须用 LaTeX 语法，用 $ 包裹**。例如：
-- 行内公式：$s(t) = A_m \\cos(2\\pi f_m t)$
-- 块级公式：$$\\Delta\\phi = \\int_0^t \\Delta\\omega(\\tau)d\\tau$$
-不要用纯文本写公式，必须用 LaTeX！
+每个知识点对应一张幻灯片。你必须为每张幻灯片选择一种 layout，且严格遵循布局多样性规则。
 
-输出格式（每张幻灯片必须有 sectionId 和 title）：
-{"slides":[{"order":1,"layout":"content","sectionId":"s1","title":"知识点标题","body":["展开细节1","展开细节2","展开细节3"]},{"order":2,"layout":"highlight","sectionId":"s1","title":"核心公式","highlight":"$s(t)=A_c\\cos(2\\pi f_c t)$","body":["补充1","补充2"]},{"order":3,"layout":"two-column","sectionId":"s2","title":"对比","leftTitle":"A","leftBody":["a1"],"rightTitle":"B","rightBody":["b1"]}]}`
+## 可选 layout（每种必须被使用至少一次）：
+
+### "two-column" — 对比/分类（≥20%）
+- 适用场景：任何可拆分为两面的内容（对比、分类、因果、优缺点、前后、AB两种方案）
+- 字段：title + leftTitle + leftBody（2-3条）+ rightTitle + rightBody（2-3条）
+- 判断技巧：如果知识点可以用"从A和B两个角度看"来描述，就用这个
+
+### "highlight" — 核心结论/公式（≥15%）
+- 适用场景：核心定理、关键公式、重要结论、总结性陈述
+- 字段：title + highlight（公式用LaTeX，结论用精炼一句话）+ body（2条补充）
+- 判断技巧：如果知识点有一个"核心结论"可以提炼出来，就用这个
+
+### "big-number" — 关键数据/指标（≥10%）
+- 适用场景：涉及具体数字、百分比、统计数据、性能指标、年份等量化信息
+- 字段：title（数据含义）+ highlight（大数字，如"99.7%"、"1.5亿"、"200+"）+ body（2-3条补充说明）+ accent（数据来源或单位标注）
+- 判断技巧：如果知识点包含醒目的数字或可以量化，就用这个
+
+### "timeline" — 流程/时间线（≥10%）
+- 适用场景：包含3-5个阶段的发展历程、工作流程、技术演进、项目进度
+- 字段：title + features 数组（每项 name=阶段名/步骤名，desc=简述）+ body（1条总结）
+- 判断技巧：如果知识点描述了"先A再B最后C"的顺序过程，就用这个
+
+### "callout" — 重要提示/注意事项（≥5%）
+- 适用场景：常见误区、重要警告、关键区别、必须记住的要点
+- 字段：title + accent（标签文字，如"注意"、"误区"、"关键"）+ highlight（核心提示语）+ body（2-3条详细说明）
+- 判断技巧：如果知识点是"容易出错的地方"或"必须注意的事项"，就用这个
+
+### "statement" — 核心观点/金句（≥5%）
+- 适用场景：可以用一句话概括的深刻观点、核心主张、设计哲学
+- 字段：highlight（核心观点一句话，要精炼有力）+ title（出处或上下文）+ accent（可选补充）
+- 判断技巧：如果知识点可以浓缩为一句震撼的话，就用这个
+
+### "quote" — 名言/观点/人物（≥5%）
+- 适用场景：涉及学者观点、经典论述、历史名言、重要定义的原文
+- 字段：title（出处/作者）+ highlight（引文/定义原文）+ body（1-2条解读）
+
+### "feature-grid" — 并列要点/特征列表（≥10%）
+- 适用场景：3-6个并列的方法、特性、步骤、要素
+- 字段：title + features 数组（每项有 name 和 desc）+ body（1条总结）
+
+### "content" — 常规讲解（最多占总数 ≤15%）
+- 适用场景：只有无法适配其他 layout 时才使用
+- 字段：title + body（3-4条展开细节，每条不超过25字）
+
+## 强制规则：
+1. 每个章节的幻灯片中，"content" layout 最多只出现 1 次
+2. 连续两张幻灯片不能使用相同 layout
+3. 优先将知识点重新组织为 two-column、big-number、highlight 或 timeline 格式，不要默认使用 content
+4. 如果知识点没有明显的对比或公式，尝试将其组织为 feature-grid 或 timeline
+
+## 数学公式必须用 LaTeX：
+- 行内：$s(t) = A_m \\cos(2\\pi f_m t)$
+- 块级：$$\\Delta\\phi = \\int_0^t \\Delta\\omega(\\tau)d\\tau$$
+
+## 输出格式：
+{"slides":[{"order":1,"layout":"two-column","sectionId":"s1","title":"标题","leftTitle":"A面","leftBody":["a1","a2"],"rightTitle":"B面","rightBody":["b1","b2"]},{"order":2,"layout":"highlight","sectionId":"s1","title":"核心结论","highlight":"$$E=mc^2$$","body":["补充1","补充2"]},{"order":3,"layout":"content","sectionId":"s1","title":"概念","body":["细节1","细节2","细节3"]},{"order":4,"layout":"quote","sectionId":"s2","title":"作者名","highlight":"引用内容","body":["解读"]},{"order":5,"layout":"feature-grid","sectionId":"s2","title":"并列特性","features":[{"name":"特性1","desc":"描述1"},{"name":"特性2","desc":"描述2"},{"name":"特性3","desc":"描述3"}],"body":["总结"]},{"order":6,"layout":"big-number","sectionId":"s1","title":"数据含义","highlight":"99.7%","accent":"准确率","body":["补充1","补充2"]},{"order":7,"layout":"timeline","sectionId":"s1","title":"发展历程","features":[{"name":"阶段1","desc":"描述"},{"name":"阶段2","desc":"描述"},{"name":"阶段3","desc":"描述"}],"body":["总结"]},{"order":8,"layout":"callout","sectionId":"s1","title":"注意事项","accent":"关键","highlight":"核心提示","body":["说明1","说明2"]},{"order":9,"layout":"statement","sectionId":"s1","highlight":"一句话核心观点","title":"上下文","accent":"补充"}]}`
         },
         {
           role: 'user' as const,
-          content: `以下共 ${totalPoints} 个知识点，请为每个生成一张幻灯片（共 ${totalPoints} 张），一个都不能少：\n\n${pointList}`
+          content: `以下共 ${totalPoints} 个知识点，请为每个生成一张幻灯片（共 ${totalPoints} 张），一个都不能少。
+
+重要提醒：
+- content 布局最多用 ${Math.max(1, Math.floor(totalPoints * 0.25))} 次
+- two-column 至少用 ${Math.max(1, Math.floor(totalPoints * 0.3))} 次
+- highlight 至少用 ${Math.max(1, Math.floor(totalPoints * 0.25))} 次
+- 相邻幻灯片布局不能相同
+
+知识点列表：
+${pointList}`
         }
       ]
 
       const batch2Result = await window.api.ai.chat(config, batch2Messages, { temperature: 0.7, max_tokens: 8192 })
       const batch2Data = JSON.parse(extractJSON(batch2Result.content))
-      const contentSlides: any[] = batch2Data.slides || []
+      const contentSlides: any[] = (batch2Data.slides || []).map(cleanSlideStrings)
 
       console.log(`[Batch2] Content slides: ${contentSlides.length} slides (expected ${totalPoints})`)
 
@@ -321,27 +430,70 @@ ${sectionIdList}
 
       // Step 1: Build final project
       setActiveStep(1)
-      const slides: Slide[] = allRawSlides.map((s: any, i: number) => ({
-        id: `slide-${i + 1}`,
-        order: s.order || i + 1,
-        sectionId: s.layout === 'title' ? '' : (s.sectionId || sections[Math.min(Math.floor(i / 3), sections.length - 1)].id),
-        layout: s.layout || 'content',
-        content: {
-          title: s.title,
-          subtitle: s.subtitle,
-          body: s.body,
-          highlight: s.highlight,
-          leftTitle: s.leftTitle,
-          leftBody: s.leftBody,
-          rightTitle: s.rightTitle,
-          rightBody: s.rightBody,
-          notes: s.notes
-        } as SlideContent
-      }))
+      const slides: Slide[] = allRawSlides.map((s: any, i: number) => {
+        // Validate two-column slides: ensure both sides have body content
+        if (s.layout === 'two-column') {
+          const leftBody = Array.isArray(s.leftBody) && s.leftBody.length > 0 ? s.leftBody : ['（详见左侧）']
+          const rightBody = Array.isArray(s.rightBody) && s.rightBody.length > 0 ? s.rightBody : ['（详见右侧）']
+          // If one side is empty but the other has content, split the richer side
+          if ((!Array.isArray(s.rightBody) || s.rightBody.length === 0) && Array.isArray(s.leftBody) && s.leftBody.length >= 2) {
+            const mid = Math.ceil(s.leftBody.length / 2)
+            return {
+              id: `slide-${i + 1}`,
+              order: s.order || i + 1,
+              sectionId: s.layout === 'title' ? '' : (s.sectionId || sections[Math.min(Math.floor(i / 3), sections.length - 1)].id),
+              layout: s.layout || 'content',
+              content: {
+                title: s.title,
+                leftTitle: s.leftTitle,
+                leftBody: s.leftBody.slice(0, mid),
+                rightTitle: s.rightTitle,
+                rightBody: s.leftBody.slice(mid),
+              } as SlideContent
+            }
+          }
+          if ((!Array.isArray(s.leftBody) || s.leftBody.length === 0) && Array.isArray(s.rightBody) && s.rightBody.length >= 2) {
+            const mid = Math.ceil(s.rightBody.length / 2)
+            return {
+              id: `slide-${i + 1}`,
+              order: s.order || i + 1,
+              sectionId: s.layout === 'title' ? '' : (s.sectionId || sections[Math.min(Math.floor(i / 3), sections.length - 1)].id),
+              layout: s.layout || 'content',
+              content: {
+                title: s.title,
+                leftTitle: s.leftTitle,
+                leftBody: s.rightBody.slice(0, mid),
+                rightTitle: s.rightTitle,
+                rightBody: s.rightBody.slice(mid),
+              } as SlideContent
+            }
+          }
+          s.leftBody = leftBody
+          s.rightBody = rightBody
+        }
+        return {
+          id: `slide-${i + 1}`,
+          order: s.order || i + 1,
+          sectionId: s.layout === 'title' ? '' : (s.sectionId || sections[Math.min(Math.floor(i / 3), sections.length - 1)].id),
+          layout: s.layout || 'content',
+          content: {
+            title: s.title,
+            subtitle: s.subtitle,
+            body: s.body,
+            highlight: s.highlight,
+            leftTitle: s.leftTitle,
+            leftBody: s.leftBody,
+            rightTitle: s.rightTitle,
+            rightBody: s.rightBody,
+            features: s.features,
+            notes: s.notes
+          } as SlideContent
+        }
+      })
 
       const project = {
         id: `proj-${Date.now()}`,
-        name: topic || 'Untitled',
+        name: topic ? (topic.length > 30 ? topic.slice(0, 28) + '…' : topic) : 'Untitled',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         documentOutline: {
@@ -374,7 +526,7 @@ ${sectionIdList}
       setErrorMsg(err.message)
       setPhase('error')
     }
-  }, [topic, selectedStyle, selectedMood, documentOutline, getAIConfig, setCurrentProject, saveProject])
+  }, [topic, selectedStyle, selectedMood, documentOutline, getAIConfig, setCurrentProject, saveProject, t])
 
   useEffect(() => {
     doGenerate()
@@ -390,15 +542,15 @@ ${sectionIdList}
   if (phase === 'error') {
     return (
       <Inner>
-        <Title style={{ color: '#c00' }}>生成失败</Title>
+        <Title style={{ color: '#c00' }}>{t('wizard.genError')}</Title>
         <ErrorBox>
           <p>{errorMsg}</p>
           {errorMsg.includes('API Key') && (
-            <RetryBtn onClick={() => setSettingsOpen(true)}>打开设置</RetryBtn>
+            <RetryBtn onClick={() => setSettingsOpen(true)}>{t('wizard.openSettings')}</RetryBtn>
           )}
         </ErrorBox>
         <br />
-        <RetryBtn onClick={doGenerate}>重试</RetryBtn>
+        <RetryBtn onClick={doGenerate}>{t('wizard.retry')}</RetryBtn>
       </Inner>
     )
   }
@@ -411,7 +563,7 @@ ${sectionIdList}
         </DoneIcon>
         <Title>{t('wizard.doneTitle')}</Title>
         <Subtitle style={{ marginBottom: 24 }}>
-          {selectedStyle || 'Bold Signal'} style, {resultStats.slides} slides
+          {t('wizard.doneStats', { style: selectedStyle || 'Bold Signal', count: resultStats.slides })}
         </Subtitle>
         <DoneStats>
           <Stat><div className="val">{resultStats.slides}</div><div className="lbl">Slides</div></Stat>
@@ -431,7 +583,7 @@ ${sectionIdList}
     <Inner>
       <Spinner />
       <Title>{t('wizard.generating')}</Title>
-      <Subtitle>{topic || 'Analog Modulation'}</Subtitle>
+      <Subtitle>{topic ? (topic.length > 60 ? topic.slice(0, 58) + '…' : topic) : 'Generating...'}</Subtitle>
       <Steps>
         {[0, 1].map((i) => (
           <Step key={i} status={errorStep === i ? 'error' : completedSteps.includes(i) ? 'done' : activeStep === i ? 'active' : 'pending'}>

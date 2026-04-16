@@ -37,6 +37,7 @@ interface ProjectState {
 
   // Slide editing
   addSlide: (afterSlideIndex: number, slide: Slide) => void
+  updateSlideContent: (slideIndex: number, content: Partial<import('../types/project').SlideContent>) => void
 
   // Persistence
   saveProject: () => Promise<void>
@@ -287,7 +288,6 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       const slides = [...s.currentProject.slides]
       const insertAt = afterSlideIndex + 1
       slides.splice(insertAt, 0, slide)
-      // Re-order all slides
       const reordered = slides.map((sl, i) => ({ ...sl, order: i + 1 }))
       return {
         currentProject: {
@@ -295,6 +295,18 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
           slides: reordered
         }
       }
+    }),
+
+  updateSlideContent: (slideIndex, content) =>
+    set((s) => {
+      if (!s.currentProject) return s
+      const slides = [...s.currentProject.slides]
+      if (slideIndex < 0 || slideIndex >= slides.length) return s
+      slides[slideIndex] = {
+        ...slides[slideIndex],
+        content: { ...slides[slideIndex].content, ...content }
+      }
+      return { currentProject: { ...s.currentProject, slides } }
     }),
 
   // === Persistence ===

@@ -25,12 +25,16 @@ const ContentArea = styled.div`
 
 export function AppLayout() {
   const currentView = useAppStore((s) => s.currentView)
+  const wizardStep = useAppStore((s) => s.currentWizardStep)
+
+  // Show sidebar on editor OR wizard home page (step 0)
+  const showSidebar = currentView === 'editor' || (currentView === 'wizard' && wizardStep === 0)
 
   return (
     <AppContainer>
       <Toolbar />
       <Main>
-        {currentView === 'editor' && <Sidebar />}
+        {showSidebar && <Sidebar />}
         <ContentArea>
           <Outlet />
         </ContentArea>
