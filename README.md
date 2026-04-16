@@ -112,6 +112,10 @@ SlideForge/
 - **马鑫** — 导出与文件处理
 - **王诣博** — UI/UX 设计与测试
 
+## 致谢
+
+- [zarazhangrui/frontend-slides](https://github.com/zarazhangrui/frontend-slides) — 风格预设定义、CSS 变量体系与视口适配规范，为本项目导出系统的设计基础
+
 ## License
 
 MIT
