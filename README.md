@@ -114,7 +114,16 @@ SlideForge/
 
 ## 致谢
 
-- [zarazhangrui/frontend-slides](https://github.com/zarazhangrui/frontend-slides) — 风格预设定义、CSS 变量体系与视口适配规范，为本项目导出系统的设计基础
+本项目的设计系统大量参考并复用了 [zarazhangrui/frontend-slides](https://github.com/zarazhangrui/frontend-slides) 项目，具体包括：
+
+- **12 套风格预设** — 名称、配色方案、字体搭配（如 Bold Signal 的 Archivo Black + Space Grotesk）均来源于该项目
+- **视口适配规范** — `viewport-base.css` 的 `clamp()` 响应式字号体系、`100vh/100dvh` 幻灯片尺寸约束、多断点媒体查询
+- **CSS 变量架构** — 主题色、内容区色、导航色等 CSS 自定义属性的组织方式
+- **设计原则** — 零依赖单文件 HTML 输出、差异化视觉风格（反 AI 通用审美）、Show Don't Tell 风格选择理念
+- **动画模式** — `.reveal` 交错入场动画、IntersectionObserver 可见性触发
+- **字体选型** — Cormorant、Fraunces、Syne、JetBrains Mono 等特色 Google Fonts 的使用
+
+我们在其基础上做了以下扩展：将静态 HTML 模板集成为 AI 驱动的自动生成流水线，增加了 12 种布局模板的结构化数据模型，扩展了导出格式（PPTX/PDF），并添加了 CSS 变量以支持内容区样式切换。
 
 ## License
 
