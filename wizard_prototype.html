@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SlideForge — Start Creating</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #F8F7FB;
+  color: #1A1A2E;
+}
+
+/* === VARS === */
+:root {
+  --primary: #6750A4;
+  --primary-light: #E8DEF8;
+  --primary-hover: #7E65C1;
+  --primary-container: #F0E8FF;
+  --bg: #F8F7FB;
+  --surface: #FFFFFF;
+  --border: #E6E6F0;
+  --text-primary: #1A1A2E;
+  --text-secondary: #666680;
+  --text-muted: #9999AA;
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  --hover: #EFEFF6;
+  --sidebar-w: 220px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === APP SHELL === */
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === START SIDEBAR === */
+.start-sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+.start-sidebar.hidden {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-right: none;
+}
+.sidebar-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-header .icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, #6750A4, #9A82DB);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 13px;
+}
+.sidebar-header .name { font-weight: 700; font-size: 15px; }
+
+.sidebar-new {
+  margin: 12px;
+  padding: 10px 16px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.sidebar-new:hover {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.sidebar-new .material-icons-round { font-size: 18px; }
+
+.sidebar-section { padding: 0 12px; margin-bottom: 4px; }
+.sidebar-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  padding: 12px 8px 6px;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 13px;
+  color: var(--text-secondary);
+  position: relative;
+}
+.sidebar-item:hover {
+  background: var(--hover);
+  color: var(--text-primary);
+}
+.sidebar-item.active {
+  background: var(--primary-container);
+  color: var(--primary);
+  font-weight: 500;
+}
+.sidebar-item .material-icons-round {
+  font-size: 18px;
+  opacity: 0.7;
+}
+.sidebar-item .item-info {
+  flex: 1;
+  min-width: 0;
+}
+.sidebar-item .item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-item .item-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.sidebar-item.active .item-meta { color: var(--primary); opacity: 0.7; }
+.sidebar-item .badge {
+  margin-left: auto;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 12px;
+}
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sidebar-bottom {
+  border-top: 1px solid var(--border);
+  padding: 8px 12px;
+}
+.sidebar-bottom .sidebar-item { padding: 8px 12px; }
+
+/* Stage body (sidebar + stage) */
+.stage-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Toggle button for sidebar */
+.sidebar-toggle {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 32px;
+  height: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  z-index: 10;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary-light);
+}
+.sidebar-toggle .material-icons-round { font-size: 18px; }
+.start-sidebar.hidden ~ .stage .sidebar-toggle {
+  display: flex;
+}
+
+/* === TOP BAR === */
+.topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.topbar-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.topbar-logo .icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #6750A4, #9A82DB);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 16px;
+}
+.topbar-logo .name { font-weight: 700; font-size: 16px; }
+.topbar-step {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 6px;
+}
+.step-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); transition: all var(--transition);
+}
+.step-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
+.step-dot.done { background: var(--primary-light); }
+
+/* === MAIN STAGE === */
+.stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* === STEP CONTAINER === */
+.step {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  opacity: 0;
+  transform: translateY(30px);
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.step.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.step.exit-up {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+/* === STEP 1: TOPIC INPUT === */
+.step1-inner {
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+}
+.step1-inner h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+.step1-inner .subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+.input-hero {
+  position: relative;
+  margin-bottom: 24px;
+}
+.input-hero textarea {
+  width: 100%;
+  height: 120px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--text-primary);
+  background: var(--surface);
+  resize: none;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  line-height: 1.6;
+}
+.input-hero textarea::placeholder { color: var(--text-muted); }
+.input-hero textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(103,80,164,0.1);
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 36px;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 12px;
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+}
+.btn-primary:hover { background: var(--primary-hover); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.btn-primary .material-icons-round { font-size: 18px; }
+.examples {
+  margin-top: 28px;
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+}
+.example-chip {
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.example-chip:hover {
+  border-color: var(--primary-light);
+  color: var(--primary);
+  background: var(--primary-container);
+}
+
+/* === STEP 2: CONTENT SCOPE === */
+.step2-inner {
+  max-width: 720px;
+  width: 100%;
+}
+.step-header {
+  margin-bottom: 32px;
+}
+.step-header .label {
+  font-size: 12px; font-weight: 600; color: var(--primary);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.step-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.step-header p { font-size: 14px; color: var(--text-secondary); }
+
+.scope-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.scope-card {
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.scope-card:hover { border-color: var(--primary-light); }
+.scope-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-container);
+}
+.scope-check {
+  width: 22px; height: 22px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+  margin-top: 1px;
+}
+.scope-card.selected .scope-check {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.scope-check .material-icons-round {
+  font-size: 16px; color: #fff; opacity: 0;
+  transition: opacity var(--transition);
+}
+.scope-card.selected .scope-check .material-icons-round { opacity: 1; }
+.scope-text h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.scope-text p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.btn-back {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 20px;
+  background: none; border: 1px solid var(--border);
+  border-radius: 10px; font-family: inherit;
+  font-size: 14px; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition);
+}
+.btn-back:hover { background: var(--surface); border-color: var(--primary-light); }
+.btn-back .material-icons-round { font-size: 16px; }
+
+/* === STEP 3: MOOD / VIBE === */
+.mood-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+  max-width: 640px;
+}
+.mood-card {
+  position: relative;
+  height: 180px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 2px solid transparent;
+}
+.mood-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.mood-card.selected { border-color: var(--primary); box-shadow: var(--shadow-lg); }
+.mood-bg {
+  position: absolute; inset: 0;
+  transition: all var(--transition);
+}
+.mood-card.selected .mood-bg { filter: brightness(0.85); }
+.mood-content {
+  position: relative; z-index: 1;
+  height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  color: #fff;
+}
+.mood-emoji { font-size: 28px; margin-bottom: 4px; }
+.mood-content h3 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.mood-content p { font-size: 12px; opacity: 0.8; line-height: 1.5; }
+.mood-check {
+  position: absolute; top: 12px; right: 12px;
+  width: 26px; height: 26px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: scale(0.5);
+  transition: all var(--transition);
+}
+.mood-card.selected .mood-check { opacity: 1; transform: scale(1); }
+.mood-check .material-icons-round { font-size: 16px; color: #fff; }
+
+/* Mood backgrounds */
+.mood-confident .mood-bg { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+.mood-excited .mood-bg { background: linear-gradient(135deg, #6B0848, #D4145A); }
+.mood-calm .mood-bg { background: linear-gradient(135deg, #EDE6D8, #C4B8A0); }
+.mood-calm .mood-content { color: #2C2418; }
+.mood-calm .mood-content p { opacity: 0.7; }
+.mood-inspired .mood-bg { background: linear-gradient(135deg, #0f0f0f, #2d1f3d); }
+
+/* === STEP 4: STYLE PREVIEW === */
+.style-grid {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 32px;
+  width: 100%;
+  max-width: 900px;
+}
+.style-card {
+  flex: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 3px solid transparent;
+  position: relative;
+}
+.style-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.style-card.selected { border-color: var(--primary); }
+.style-card.selected::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 13px;
+  box-shadow: inset 0 0 0 2px var(--primary);
+  pointer-events: none;
+}
+.style-preview {
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.style-card-name {
+  padding: 12px 16px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.style-card-name h4 { font-size: 13px; font-weight: 600; }
+.style-card-name span { font-size: 11px; color: var(--text-muted); }
+.style-tag {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,0.5); color: #fff;
+  padding: 3px 10px; border-radius: 10px;
+  font-size: 10px; font-weight: 600;
+}
+.style-select-badge {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 48px; height: 48px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
+}
+.style-card.selected .style-select-badge { transform: translate(-50%, -50%) scale(1); }
+.style-select-badge .material-icons-round { font-size: 24px; color: #fff; }
+
+/* Style A: Swiss Modern */
+.style-a .style-preview {
+  background: #FAFAF8;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.style-a .preview-line {
+  width: 40px; height: 3px; background: #D4380D;
+  border-radius: 2px; margin-bottom: 12px;
+}
+.style-a .preview-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px; font-weight: 700; color: #1A1A1A;
+  line-height: 1.15; margin-bottom: 6px;
+}
+.style-a .preview-title span { color: #D4380D; }
+.style-a .preview-sub {
+  font-size: 11px; color: #6B6B6B; line-height: 1.6;
+}
+
+/* Style B: Paper & Ink */
+.style-b .style-preview {
+  background: #F5F0E8;
+}
+.style-b .preview-line-v {
+  position: absolute; left: 14px; top: 28px; bottom: 28px;
+  width: 2px; background: rgba(139,69,19,0.3);
+}
+.style-b .preview-blob {
+  position: absolute; top: 10%; right: 8%;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,69,19,0.08) 0%, transparent 70%);
+}
+.style-b .preview-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 700; color: #1A1610;
+  line-height: 1.2; margin-bottom: 4px;
+}
+.style-b .preview-italic {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 13px; color: #8B4513;
+  margin-bottom: 10px;
+}
+.style-b .preview-sub {
+  font-size: 10px; color: #7A6E5D; line-height: 1.7; max-width: 160px;
+}
+.style-b .preview-formula {
+  position: absolute; bottom: 16px; right: 20px;
+  font-family: monospace; font-size: 9px;
+  color: rgba(139,69,19,0.25);
+}
+
+/* Style C: Neon Cyber */
+.style-c .style-preview {
+  background: #0a0f1c;
+}
+.style-c .preview-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,204,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,204,0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.style-c .preview-glow {
+  position: absolute; top: 20%; left: 10%;
+  width: 80px; height: 40px;
+  background: rgba(0,255,204,0.08);
+  filter: blur(20px); border-radius: 50%;
+}
+.style-c .preview-tag {
+  font-family: monospace; font-size: 8px;
+  color: #00ffcc; letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.style-c .preview-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px; font-weight: 700; color: #fff;
+  line-height: 1.2; margin-bottom: 4px;
+}
+.style-c .preview-title span { color: #00ffcc; }
+.style-c .preview-sub {
+  font-size: 10px; color: rgba(255,255,255,0.5); line-height: 1.6;
+}
+.style-c .preview-badge {
+  position: absolute; bottom: 16px; right: 16px;
+  padding: 2px 8px; border: 1px solid rgba(0,255,204,0.3);
+  border-radius: 4px; font-size: 8px; color: #00ffcc;
+}
+
+/* === STEP 5: GENERATING === */
+.generating-inner {
+  text-align: center;
+}
+.gen-spinner {
+  width: 56px; height: 56px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.generating-inner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; margin-bottom: 8px;
+}
+.generating-inner p { color: var(--text-secondary); font-size: 14px; }
+.gen-steps {
+  margin-top: 24px;
+  display: flex; flex-direction: column; gap: 8px;
+  text-align: left;
+  max-width: 320px;
+  margin-left: auto; margin-right: auto;
+}
+.gen-step {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+.gen-step.active { color: var(--primary); font-weight: 500; }
+.gen-step.done { color: var(--text-secondary); }
+.gen-step .material-icons-round { font-size: 18px; }
+
+/* === DONE STATE (step 5 animates into this) === */
+.done-inner {
+  text-align: center;
+}
+.done-icon {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, #6750A4, #9A82DB);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.done-icon .material-icons-round { font-size: 32px; color: #fff; }
+.done-inner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; margin-bottom: 6px;
+}
+.done-inner p { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+.done-info {
+  display: inline-flex; gap: 20px;
+  margin-bottom: 28px;
+}
+.done-stat {
+  text-align: center;
+}
+.done-stat .val { font-size: 24px; font-weight: 700; color: var(--primary); }
+.done-stat .lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-logo" onclick="toggleSidebar()" style="cursor:pointer;">
+      <span class="material-icons-round" style="font-size:20px; color:var(--text-secondary);">menu</span>
+      <span class="name">SlideForge</span>
+    </div>
+    <div class="topbar-step">
+      <div class="step-dot active" data-step="0"></div>
+      <div class="step-dot" data-step="1"></div>
+      <div class="step-dot" data-step="2"></div>
+      <div class="step-dot" data-step="3"></div>
+    </div>
+  </div>
+
+  <!-- Stage Body (sidebar + content) -->
+  <div class="stage-body">
+      <!-- Left Sidebar -->
+      <div class="start-sidebar" id="startSidebar">
+        <div class="sidebar-header">
+          <div class="icon">S</div>
+          <span class="name">SlideForge</span>
+        </div>
+        <button class="sidebar-new" onclick="toggleSidebar()">
+          <span class="material-icons-round">add</span> New Project
+        </button>
+        <div class="sidebar-nav">
+          <div class="sidebar-section">
+            <div class="sidebar-section-title">Recent Projects</div>
+            <div class="sidebar-item active">
+              <span class="material-icons-round">slideshow</span>
+              <div class="item-info">
+                <div class="item-name">模拟调制系统分析</div>
+                <div class="item-meta">Bold Signal · 15 slides · Today</div>
+              </div>
+              <span class="badge">15p</span>
+            </div>
+            <div class="sidebar-item">
+              <span class="material-icons-round">slideshow</span>
+              <div class="item-info">
+                <div class="item-name">深度学习综述报告</div>
+                <div class="item-meta">Paper & Ink · 20 slides · Yesterday</div>
+              </div>
+            </div>
+            <div class="sidebar-item">
+              <span class="material-icons-round">slideshow</span>
+              <div class="item-info">
+                <div class="item-name">项目进度汇报 Q1</div>
+                <div class="item-meta">Swiss Modern · 12 slides · 3 days ago</div>
+              </div>
+            </div>
+            <div class="sidebar-item">
+              <span class="material-icons-round">slideshow</span>
+              <div class="item-info">
+                <div class="item-name">文艺复兴艺术与人文</div>
+                <div class="item-meta">Vintage Editorial · 18 slides · Last week</div>
+              </div>
+            </div>
+            <div class="sidebar-item">
+              <span class="material-icons-round">slideshow</span>
+              <div class="item-info">
+                <div class="item-name">NLP 技术综述</div>
+                <div class="item-meta">Neon Cyber · 22 slides · Last week</div>
+              </div>
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-section-title">Documents</div>
+            <div class="sidebar-item">
+              <span class="material-icons-round">description</span>
+              <div class="item-info">
+                <div class="item-name">Uploaded Files</div>
+              </div>
+              <span class="badge">7</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-bottom">
+          <div class="sidebar-item"><span class="material-icons-round">settings</span> Settings</div>
+          <div class="sidebar-item"><span class="material-icons-round">info</span> About</div>
+        </div>
+      </div>
+
+      <!-- Stage Content -->
+      <div class="stage" style="flex:1; position:relative;">
+
+    <!-- STEP 1: What do you want to present? -->
+    <div class="step active" id="step0">
+      <div class="step1-inner">
+        <h1>What will you present?</h1>
+        <p class="subtitle">Tell me your topic, and I'll help you craft a stunning presentation.</p>
+        <div class="input-hero">
+          <textarea id="topicInput" placeholder="e.g. A course presentation on analog modulation in communication principles..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="goToStep(1)">
+          Continue
+          <span class="material-icons-round">arrow_forward</span>
+        </button>
+        <div class="examples">
+          <span class="example-chip" onclick="fillExample('通信原理中的模拟调制技术')">Analog Modulation</span>
+          <span class="example-chip" onclick="fillExample('深度学习在自然语言处理中的应用')">Deep Learning & NLP</span>
+          <span class="example-chip" onclick="fillExample('2026年Q1产品路线图汇报')">Product Roadmap</span>
+          <span class="example-chip" onclick="fillExample('文艺复兴时期的艺术与人文')">Renaissance Art</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Content Scope -->
+    <div class="step" id="step1">
+      <div class="step2-inner">
+        <div class="step-header">
+          <p class="label">Content Scope</p>
+          <h2>What should we cover?</h2>
+          <p>Select the modules to include in your presentation.</p>
+        </div>
+        <div class="scope-grid">
+          <div class="scope-card selected" onclick="toggleScope(this)">
+            <div class="scope-check"><span class="material-icons-round">check</span></div>
+            <div class="scope-text">
+              <h3>Core Concepts</h3>
+              <p>Fundamental definitions and principles</p>
+            </div>
+          </div>
+          <div class="scope-card" onclick="toggleScope(this)">
+            <div class="scope-check"><span class="material-icons-round">check</span></div>
+            <div class="scope-text">
+              <h3>Technical Analysis</h3>
+              <p>Formulas, data, and detailed breakdowns</p>
+            </div>
+          </div>
+          <div class="scope-card" onclick="toggleScope(this)">
+            <div class="scope-check"><span class="material-icons-round">check</span></div>
+            <div class="scope-text">
+              <h3>Comparisons</h3>
+              <p>Side-by-side analysis of approaches</p>
+            </div>
+          </div>
+          <div class="scope-card" onclick="toggleScope(this)">
+            <div class="scope-check"><span class="material-icons-round">check</span></div>
+            <div class="scope-text">
+              <h3>Applications & Examples</h3>
+              <p>Real-world use cases and case studies</p>
+            </div>
+          </div>
+        </div>
+        <div class="step-actions">
+          <button class="btn-back" onclick="goToStep(0)">
+            <span class="material-icons-round">arrow_back</span> Back
+          </button>
+          <button class="btn-primary" onclick="goToStep(2)">
+            Continue
+            <span class="material-icons-round">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Mood / Vibe -->
+    <div class="step" id="step2">
+      <div class="step2-inner">
+        <div class="step-header">
+          <p class="label">Audience Feeling</p>
+          <h2>How should your audience feel?</h2>
+          <p>Pick the mood that best matches your vision.</p>
+        </div>
+        <div class="mood-grid">
+          <div class="mood-card mood-confident" onclick="selectMood(this, 'confident')">
+            <div class="mood-bg"></div>
+            <div class="mood-content">
+              <div>
+                <div class="mood-emoji">
+                  <span class="material-icons-round" style="font-size:28px;">verified</span>
+                </div>
+                <h3>Professional & Confident</h3>
+                <p>Trustworthy, established, "this team knows what they're doing"</p>
+              </div>
+            </div>
+            <div class="mood-check"><span class="material-icons-round">check</span></div>
+          </div>
+          <div class="mood-card mood-excited" onclick="selectMood(this, 'excited')">
+            <div class="mood-bg"></div>
+            <div class="mood-content">
+              <div>
+                <div class="mood-emoji">
+                  <span class="material-icons-round" style="font-size:28px;">bolt</span>
+                </div>
+                <h3>Excited & Energized</h3>
+                <p>Innovative, bold, futuristic, full of energy</p>
+              </div>
+            </div>
+            <div class="mood-check"><span class="material-icons-round">check</span></div>
+          </div>
+          <div class="mood-card mood-calm" onclick="selectMood(this, 'calm')">
+            <div class="mood-bg"></div>
+            <div class="mood-content">
+              <div>
+                <div class="mood-emoji">
+                  <span class="material-icons-round" style="font-size:28px;">spa</span>
+                </div>
+                <h3>Calm & Focused</h3>
+                <p>Clear, thoughtful, easy to follow along</p>
+              </div>
+            </div>
+            <div class="mood-check"><span class="material-icons-round">check</span></div>
+          </div>
+          <div class="mood-card mood-inspired" onclick="selectMood(this, 'inspired')">
+            <div class="mood-bg"></div>
+            <div class="mood-content">
+              <div>
+                <div class="mood-emoji">
+                  <span class="material-icons-round" style="font-size:28px;">auto_awesome</span>
+                </div>
+                <h3>Inspired & Moved</h3>
+                <p>Emotional, storytelling, memorable impact</p>
+              </div>
+            </div>
+            <div class="mood-check"><span class="material-icons-round">check</span></div>
+          </div>
+        </div>
+        <div class="step-actions">
+          <button class="btn-back" onclick="goToStep(1)">
+            <span class="material-icons-round">arrow_back</span> Back
+          </button>
+          <button class="btn-primary" id="moodNextBtn" onclick="goToStep(3)" style="opacity:0.5; pointer-events:none;">
+            Continue
+            <span class="material-icons-round">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Style Preview -->
+    <div class="step" id="step3">
+      <div class="step2-inner" style="max-width:880px;">
+        <div class="step-header" style="text-align:center;">
+          <p class="label">Style Preview</p>
+          <h2>Choose your style</h2>
+          <p>Each style is tailored to your chosen mood. Pick the one that resonates.</p>
+        </div>
+        <div class="style-grid">
+          <!-- Style A -->
+          <div class="style-card style-a" onclick="selectStyle(this)">
+            <div class="style-preview">
+              <div class="preview-line"></div>
+              <div class="preview-title">模拟<span>调制</span><br>Analog Modulation</div>
+              <div class="preview-sub">从幅度调制到角度调制，探索通信信号传输的核心原理</div>
+              <span class="style-tag">Recommended</span>
+            </div>
+            <div class="style-select-badge"><span class="material-icons-round">check</span></div>
+            <div class="style-card-name">
+              <h4>Swiss Modern</h4>
+              <span>Minimal · Precise · Grid</span>
+            </div>
+          </div>
+          <!-- Style B -->
+          <div class="style-card style-b" onclick="selectStyle(this)">
+            <div class="style-preview">
+              <div class="preview-line-v"></div>
+              <div class="preview-blob"></div>
+              <div class="preview-title">模拟调制</div>
+              <div class="preview-italic">Analog Modulation</div>
+              <div class="preview-sub">探索载波信号与调制信号的本质关系，理解频谱特征</div>
+              <div class="preview-formula">s(t) = A(t)·cos(2πf<t>c</t>t + φ(t))</div>
+            </div>
+            <div class="style-select-badge"><span class="material-icons-round">check</span></div>
+            <div class="style-card-name">
+              <h4>Paper & Ink</h4>
+              <span>Warm · Literary · Thoughtful</span>
+            </div>
+          </div>
+          <!-- Style C -->
+          <div class="style-card style-c" onclick="selectStyle(this)">
+            <div class="style-preview">
+              <div class="preview-grid"></div>
+              <div class="preview-glow"></div>
+              <div class="preview-tag">// Communication Principles</div>
+              <div class="preview-title">模拟<span>调制</span></div>
+              <div class="preview-sub">ANALOG MODULATION SYSTEM ANALYSIS</div>
+              <div class="preview-badge">15 SLIDES</div>
+            </div>
+            <div class="style-select-badge"><span class="material-icons-round">check</span></div>
+            <div class="style-card-name">
+              <h4>Neon Cyber</h4>
+              <span>Futuristic · Tech · Bold</span>
+            </div>
+          </div>
+        </div>
+        <div class="step-actions" style="justify-content:center; gap:12px;">
+          <button class="btn-back" onclick="goToStep(2)">
+            <span class="material-icons-round">arrow_back</span> Back
+          </button>
+          <button class="btn-primary" id="generateBtn" onclick="startGenerate()" style="opacity:0.5; pointer-events:none;">
+            <span class="material-icons-round">auto_awesome</span>
+            Generate Presentation
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Generating -->
+    <div class="step" id="step4">
+      <div class="generating-inner" id="genView">
+        <div class="gen-spinner"></div>
+        <h2>Creating your presentation...</h2>
+        <p id="genTopic">Analog Modulation</p>
+        <div class="gen-steps">
+          <div class="gen-step active" id="gs0">
+            <span class="material-icons-round">hourglass_top</span> Analyzing content structure...
+          </div>
+          <div class="gen-step" id="gs1">
+            <span class="material-icons-round">hourglass_top</span> Generating slide outline...
+          </div>
+          <div class="gen-step" id="gs2">
+            <span class="material-icons-round">hourglass_top</span> Applying style & animations...
+          </div>
+          <div class="gen-step" id="gs3">
+            <span class="material-icons-round">hourglass_top</span> Rendering final presentation...
+          </div>
+        </div>
+      </div>
+      <div class="done-inner" id="doneView" style="display:none;">
+        <div class="done-icon"><span class="material-icons-round">check</span></div>
+        <h2>Your presentation is ready!</h2>
+        <p id="doneStyle">Paper & Ink style, 15 slides</p>
+        <div class="done-info">
+          <div class="done-stat"><div class="val">15</div><div class="lbl">Slides</div></div>
+          <div class="done-stat"><div class="val">5</div><div class="lbl">Sections</div></div>
+          <div class="done-stat"><div class="val">1</div><div class="lbl">File</div></div>
+        </div>
+        <br>
+        <button class="btn-primary" style="font-size:16px; padding:16px 40px;">
+          <span class="material-icons-round">play_arrow</span>
+          Open Presentation
+        </button>
+      </div>
+    </div>
+
+      </div><!-- close inner stage -->
+    </div><!-- close stage-body -->
+</div>
+
+<script>
+let currentStep = 0;
+let selectedMood = null;
+let selectedStyle = null;
+
+const dots = document.querySelectorAll('.step-dot');
+const steps = document.querySelectorAll('.step');
+
+function goToStep(n) {
+  if (n === currentStep) return;
+  const prev = steps[currentStep];
+  const next = steps[n];
+
+  prev.classList.remove('active');
+  prev.classList.add(n > currentStep ? 'exit-up' : '');
+  setTimeout(() => { prev.classList.remove('exit-up'); }, 500);
+
+  next.classList.add('active');
+  currentStep = n;
+  updateDots();
+
+  // Auto-hide sidebar on steps > 0
+  const sidebar = document.getElementById('startSidebar');
+  if (n > 0) {
+    sidebar.classList.add('hidden');
+  } else {
+    sidebar.classList.remove('hidden');
+  }
+}
+
+function updateDots() {
+  dots.forEach((d, i) => {
+    d.classList.remove('active', 'done');
+    if (i === currentStep) d.classList.add('active');
+    else if (i < currentStep) d.classList.add('done');
+  });
+}
+
+function fillExample(text) {
+  document.getElementById('topicInput').value = text;
+  document.getElementById('topicInput').focus();
+}
+
+function toggleScope(el) {
+  el.classList.toggle('selected');
+}
+
+function selectMood(el, mood) {
+  document.querySelectorAll('.mood-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMood = mood;
+  const btn = document.getElementById('moodNextBtn');
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+}
+
+function selectStyle(el) {
+  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedStyle = el.querySelector('.style-card-name h4').textContent;
+  const btn = document.getElementById('generateBtn');
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+}
+
+function startGenerate() {
+  goToStep(4);
+  const topic = document.getElementById('topicInput').value || 'Analog Modulation';
+  document.getElementById('genTopic').textContent = topic;
+
+  // Simulate generation steps
+  const stepEls = [document.getElementById('gs0'), document.getElementById('gs1'), document.getElementById('gs2'), document.getElementById('gs3')];
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i > 0) {
+      stepEls[i-1].classList.remove('active');
+      stepEls[i-1].classList.add('done');
+      stepEls[i-1].querySelector('.material-icons-round').textContent = 'check_circle';
+    }
+    if (i < 4) {
+      stepEls[i].classList.add('active');
+      i++;
+    } else {
+      clearInterval(interval);
+      // Show done
+      setTimeout(() => {
+        document.getElementById('genView').style.display = 'none';
+        document.getElementById('doneView').style.display = 'block';
+        const style = selectedStyle || 'Swiss Modern';
+        document.getElementById('doneStyle').textContent = style + ' style, 15 slides';
+      }, 600);
+    }
+  }, 900);
+}
+
+// Keyboard shortcut: Enter to continue from step 0
+document.getElementById('topicInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    goToStep(1);
+  }
+});
+
+// Sidebar toggle
+function toggleSidebar() {
+  const sidebar = document.getElementById('startSidebar');
+  sidebar.classList.toggle('hidden');
+  // Reset to step 0 when clicking "New Project"
+  if (sidebar.classList.contains('hidden') && currentStep !== 0) {
+    goToStep(0);
+  }
+}
+
+// Sidebar item click
+document.querySelectorAll('.sidebar-nav .sidebar-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-nav .sidebar-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
