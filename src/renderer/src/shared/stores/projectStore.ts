@@ -313,31 +313,46 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   saveProject: async () => {
     const { currentProject } = get()
     if (!currentProject) return
-    const api = (window as any).api
-    await api.project.save(currentProject)
-    // Refresh recent list
-    await get().loadRecentProjects()
+    try {
+      const api = (window as any).api
+      await api.project.save(currentProject)
+      await get().loadRecentProjects()
+    } catch (e) {
+      console.error('Failed to save project:', e)
+    }
   },
 
   loadProjectById: async (id: string) => {
-    const api = (window as any).api
-    const result = await api.project.load(id)
-    if (result.success && result.project) {
-      set({ currentProject: result.project, chatMessages: [] })
+    try {
+      const api = (window as any).api
+      const result = await api.project.load(id)
+      if (result.success && result.project) {
+        set({ currentProject: result.project, chatMessages: [] })
+      }
+    } catch (e) {
+      console.error('Failed to load project:', e)
     }
   },
 
   loadRecentProjects: async () => {
-    const api = (window as any).api
-    const result = await api.project.list()
-    if (result.success) {
-      set({ recentProjects: result.projects })
+    try {
+      const api = (window as any).api
+      const result = await api.project.list()
+      if (result.success) {
+        set({ recentProjects: result.projects })
+      }
+    } catch (e) {
+      console.error('Failed to load recent projects:', e)
     }
   },
 
   deleteProjectById: async (id: string) => {
-    const api = (window as any).api
-    await api.project.delete(id)
-    await get().loadRecentProjects()
+    try {
+      const api = (window as any).api
+      await api.project.delete(id)
+      await get().loadRecentProjects()
+    } catch (e) {
+      console.error('Failed to delete project:', e)
+    }
   }
 }))
