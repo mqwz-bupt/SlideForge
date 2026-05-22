@@ -11,8 +11,12 @@ import { useSettingsStore } from '@/shared/stores/settingsStore'
 export function App() {
   const { i18n } = useTranslation()
   const language = useSettingsStore((s) => s.language)
+  const loadEncryptedApiKey = useSettingsStore((s) => s.loadEncryptedApiKey)
 
   useEffect(() => { i18n.changeLanguage(language) }, [language, i18n])
+
+  // Load encrypted API key from safe storage on startup
+  useEffect(() => { loadEncryptedApiKey() }, [loadEncryptedApiKey])
 
   return (
     <AppThemeProvider>

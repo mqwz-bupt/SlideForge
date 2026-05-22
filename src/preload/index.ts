@@ -26,6 +26,12 @@ const api = {
     /** Delete a project */
     delete: (id: string) => ipcRenderer.invoke('project:delete', id)
   },
+  safeStore: {
+    /** Get a decrypted value from safe storage */
+    get: (key: string) => ipcRenderer.invoke('safe-store:get', key),
+    /** Encrypt and store a value, returns the encrypted token */
+    set: (key: string, value: string) => ipcRenderer.invoke('safe-store:set', key, value)
+  },
   ai: {
     /** Test if an API key is valid */
     testKey: (config: {

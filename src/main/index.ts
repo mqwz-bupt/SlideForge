@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, safeStorage } from 'electron'
 import { join } from 'path'
 import { readFile, writeFile } from 'fs/promises'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -134,6 +134,25 @@ app.whenReady().then(() => {
   })
 
   // === Project persistence IPC handlers ===
+
+  // Safe storage for sensitive data (API keys) using Electron safeStorage
+  ipcMain.handle('safe-store:get', (_event, key: string) => {
+    try {
+      const buf = safeStorage.decryptString(Buffer.from(key, 'base64'))
+      return buf.toString()
+    } catch {
+      return null
+    }
+  })
+
+  ipcMain.handle('safe-store:set', (_event, _key: string, value: string) => {
+    try {
+      const encrypted = safeStorage.encryptString(value)
+      return encrypted.toString('base64')
+    } catch {
+      return null
+    }
+  })
 
   ipcMain.handle('project:save', (_event, project: any) => {
     try {

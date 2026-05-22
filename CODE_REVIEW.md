@@ -24,10 +24,10 @@
 - **问题**: `handleSend` 中注册的 `onStreamChunk` 监听器在组件卸载时未清理。若用户在 AI 流式输出期间切换页面，监听器仍持有闭包引用，造成内存泄漏和潜在的 state 更新崩溃。
 - **修复方案**: 在 `useEffect` cleanup 中移除监听器，或使用 `AbortController` 模式中断流式请求。
 
-### C2. API Key 明文存储
-- **文件**: `src/renderer/src/shared/stores/settingsStore.ts` (49-54 行)
+### C2. ~~API Key 明文存储~~ ✅ 已修复
+- **文件**: `src/renderer/src/shared/stores/settingsStore.ts`
 - **问题**: AI API Key 以明文形式存储在 localStorage，无加密、无验证。
-- **修复方案**: 使用 Electron 的 `safeStorage` API 加密后存储，或迁移至 keytar/credential manager。
+- **已修复**: 使用 Electron `safeStorage` API 加密存储 apiKey。自定义 persist storage 将 apiKey 加密后存入独立 localStorage key，其他设置仍明文存储。启动时通过 IPC 解密恢复到内存。新增 `safe-store:get/set` IPC 通道。
 
 ### C3. HTML 转义函数不完整
 - **文件**: `src/main/export/html.ts` (445-447 行)
