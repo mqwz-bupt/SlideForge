@@ -756,7 +756,7 @@ export async function generatePPTX(project: ProjectData): Promise<Buffer> {
         // Decorative circle
         s.addShape(pptx.ShapeType.ellipse, {
           x: 7.5, y: -0.5, w: 3.0, h: 3.0,
-          fill: { color: C.accentBg }, opacity: 8
+          fill: { color: C.accentBg }
         })
 
         // Statement text — vertically centered

@@ -202,6 +202,14 @@ export function ChatPanel() {
   const [streaming, setStreaming] = useState(false)
   const [streamContent, setStreamContent] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const cleanupRef = useRef<(() => void) | null>(null)
+
+  // Cleanup streaming listeners on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (cleanupRef.current) cleanupRef.current()
+    }
+  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -362,9 +370,7 @@ ${JSON.stringify(slidesContext, null, 0)}
         addChatMessage(aiMsg)
         setStreaming(false)
         setStreamContent('')
-        removeChunkListener()
-        removeDoneListener()
-        removeErrorListener()
+        removeListeners()
       })
 
       const removeErrorListener = window.api.ai.onStreamError((error) => {
@@ -376,10 +382,17 @@ ${JSON.stringify(slidesContext, null, 0)}
         })
         setStreaming(false)
         setStreamContent('')
+        removeListeners()
+      })
+
+      // Unified cleanup function stored in ref for unmount safety
+      const removeListeners = () => {
         removeChunkListener()
         removeDoneListener()
         removeErrorListener()
-      })
+        cleanupRef.current = null
+      }
+      cleanupRef.current = removeListeners
 
       await window.api.ai.chatStream(config, aiMessages)
     } catch (err: any) {

@@ -443,7 +443,18 @@ document.addEventListener('keydown', function(e) {
 // ── Helpers ──
 
 function esc(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function sanitizeUrl(url: string): string {
+  const trimmed = url.trim()
+  if (/^(https?:\/\/|data:image\/)/i.test(trimmed)) return trimmed
+  return ''
 }
 
 function generateNavDots(total: number): string {
@@ -560,6 +571,7 @@ function generateFeatureGridSlide(slide: SlideData, slideNumber: number): string
 
 function generateImageSlide(slide: SlideData, slideNumber: number): string {
   const { title, body, imageUrl } = slide.content
+  const safeUrl = sanitizeUrl(imageUrl || '')
   return `<section class="slide content-slide">
   <div class="slide-bg-number">${slideNumber}</div>
   <div class="slide-accent-bar"></div>
@@ -568,7 +580,7 @@ function generateImageSlide(slide: SlideData, slideNumber: number): string {
     <div class="split-grid">
       <div class="text-side reveal">${generateBullets(body || [])}</div>
       <div class="image-side reveal">
-        ${imageUrl ? `<img src="${imageUrl}" alt="${esc(title)}" loading="lazy" />` : ''}
+        ${safeUrl ? `<img src="${safeUrl}" alt="${esc(title)}" loading="lazy" />` : ''}
       </div>
     </div>
   </div>

@@ -226,9 +226,12 @@ export function OutlinePanel() {
                   <span className="material-icons-round" style={{ fontSize: 13 }}>{section.isCollapsed ? 'unfold_more' : 'unfold_less'}</span>
                 </SmallBtn>
                 <SmallBtn danger title="Delete section" onClick={() => {
+                  const isCurrentSection = activeSectionId === section.id
                   deleteSection(section.id)
-                  setActiveSlideIndex(0)
-                  if (activeSectionId === section.id) setActiveSectionId(null)
+                  if (isCurrentSection) {
+                    setActiveSectionId(null)
+                    setActiveSlideIndex(0)
+                  }
                 }}>
                   <span className="material-icons-round" style={{ fontSize: 13 }}>close</span>
                 </SmallBtn>
