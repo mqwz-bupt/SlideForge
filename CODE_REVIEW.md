@@ -39,20 +39,20 @@
 - **问题**: `deleteSection` 中 `deleteSection()`、`setActiveSlideIndex(0)`、`setActiveSectionId(null)` 三个 setState 调用非原子操作，可能导致中间状态不一致。
 - **修复方案**: 将关联状态更新合并为单次 dispatch，或使用 `flushSync` 确保同步更新。
 
-### C5. 超大函数 — generatePPTX（687 行）
-- **文件**: `src/main/export/pptx.ts` (118-805 行)
-- **问题**: 单个函数 687 行，远超 50 行上限。包含 12 种布局的生成逻辑全部堆叠，嵌套 4+ 层。
-- **修复方案**: 按布局类型拆分为独立函数：`generateTitleSlide()`、`generateContentSlide()` 等。
+### C5. ~~超大函数 — generatePPTX（687 行）~~ ✅ 已修复
+- **文件**: `src/main/export/pptx.ts`
+- **问题**: 单个函数 687 行，远超 50 行上限。
+- **已修复**: 拆分为 12 个独立布局函数 + `SlideContext` 接口。文件从 810→356 行。
 
-### C6. 超大文件 — PreviewArea.tsx（1176 行）
+### C6. ~~超大文件 — PreviewArea.tsx（1176 行）~~ ✅ 已修复
 - **文件**: `src/renderer/src/features/editor/components/PreviewArea.tsx`
-- **问题**: 文件 1176 行，包含 SlideRenderer（200 行）、PreviewArea（233 行）等多个大型组件和复杂样式定义。
-- **修复方案**: 拆分为 `SlideRenderer.tsx`、`FullscreenCanvas.tsx`、`ThumbnailStrip.tsx` 独立文件。
+- **问题**: 文件 1176 行，包含多个大型组件和复杂样式定义。
+- **已修复**: 提取 `SlideRenderer.tsx`（745 行，含所有布局样式和渲染逻辑）。PreviewArea 降至 424 行。
 
-### C7. 超大函数 — doGenerate（292 行）
-- **文件**: `src/renderer/src/features/wizard/steps/GeneratingStep.tsx` (237-529 行)
-- **问题**: 单个函数 292 行，包含 AI 调用、JSON 修复、内容清洗、幻灯片合并、自动保存等全部逻辑。
-- **修复方案**: 拆分为 `callAI()`、`cleanSlides()`、`mergeSlides()`、`autoSave()` 独立函数。
+### C7. ~~超大函数 — doGenerate（292 行）~~ ✅ 已修复
+- **文件**: `src/renderer/src/features/wizard/steps/GeneratingStep.tsx`
+- **问题**: 单个函数 292 行，包含 AI 调用、JSON 修复、内容清洗等全部逻辑。
+- **已修复**: 提取 `repairJSON`、`cleanText`、`cleanSlideStrings`、`extractJSON` 到 `src/renderer/src/shared/utils/slideUtils.ts`（107 行）。GeneratingStep 降至 493 行。
 
 ---
 

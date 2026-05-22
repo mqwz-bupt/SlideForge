@@ -442,7 +442,7 @@ document.addEventListener('keydown', function(e) {
 
 // ── Helpers ──
 
-function esc(s: string): string {
+export function esc(s: string): string {
   return s
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -451,7 +451,7 @@ function esc(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function sanitizeUrl(url: string): string {
+export function sanitizeUrl(url: string): string {
   const trimmed = url.trim()
   if (/^(https?:\/\/|data:image\/)/i.test(trimmed)) return trimmed
   return ''
