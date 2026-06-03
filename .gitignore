@@ -3,3 +3,8 @@ out/
 dist/
 .DS_Store
 *.log
+.idea/
+*.pid
+*.tsbuildinfo
+release/
+font-size-preview.html

@@ -1,14 +1,14 @@
 import { ThemeProvider as EmotionThemeProvider, Global, css } from '@emotion/react'
 import React, { useMemo } from 'react'
-import { getTheme, type Theme } from './index'
+import { getTheme, type Theme as AppTheme } from './index'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
 
 declare module '@emotion/react' {
   export interface Theme {
-    colors: Theme['colors']
-    shadows: Theme['shadows']
-    radius: Theme['radius']
-    layout: Theme['layout']
+    colors: AppTheme['colors']
+    shadows: AppTheme['shadows']
+    radius: AppTheme['radius']
+    layout: AppTheme['layout']
     transition: string
     transitionSlow: string
   }

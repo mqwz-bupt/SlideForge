@@ -50,12 +50,14 @@ export interface SlideContent {
   body?: string[]
   accent?: string
   imageUrl?: string
+  imageQuery?: string
   highlight?: string
   leftTitle?: string
   leftBody?: string[]
   rightTitle?: string
   rightBody?: string[]
   features?: Array<{ name: string; desc: string }>
+  notes?: string
 }
 
 export type StylePreset =

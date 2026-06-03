@@ -48,8 +48,8 @@ html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
   --title-size: clamp(1.5rem, 5vw, 4rem);
   --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
   --h3-size: clamp(1rem, 2.5vw, 1.75rem);
-  --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
-  --small-size: clamp(0.65rem, 1vw, 0.875rem);
+  --body-size: clamp(0.95rem, 1.8vw, 1.45rem);
+  --small-size: clamp(0.78rem, 1.15vw, 1rem);
   --slide-padding: clamp(1rem, 4vw, 4rem);
   --content-gap: clamp(0.5rem, 2vw, 2rem);
   --element-gap: clamp(0.25rem, 1vw, 1rem);
@@ -60,11 +60,11 @@ img, .image-container { max-width: 100%; max-height: min(50vh, 400px); object-fi
   :root { --slide-padding: clamp(0.75rem,3vw,2rem); --content-gap: clamp(0.4rem,1.5vw,1rem); --title-size: clamp(1.25rem,4.5vw,2.5rem); --h2-size: clamp(1rem,3vw,1.75rem); }
 }
 @media (max-height: 600px) {
-  :root { --slide-padding: clamp(0.5rem,2.5vw,1.5rem); --content-gap: clamp(0.3rem,1vw,0.75rem); --title-size: clamp(1.1rem,4vw,2rem); --body-size: clamp(0.7rem,1.2vw,0.95rem); }
+  :root { --slide-padding: clamp(0.5rem,2.5vw,1.5rem); --content-gap: clamp(0.3rem,1vw,0.75rem); --title-size: clamp(1.1rem,4vw,2rem); --body-size: clamp(0.82rem,1.35vw,1.08rem); }
   .nav-dots, .keyboard-hint, .decorative { display: none; }
 }
 @media (max-height: 500px) {
-  :root { --slide-padding: clamp(0.4rem,2vw,1rem); --title-size: clamp(1rem,3.5vw,1.5rem); --h2-size: clamp(0.9rem,2.5vw,1.25rem); --body-size: clamp(0.65rem,1vw,0.85rem); }
+  :root { --slide-padding: clamp(0.4rem,2vw,1rem); --title-size: clamp(1rem,3.5vw,1.5rem); --h2-size: clamp(0.9rem,2.5vw,1.25rem); --body-size: clamp(0.76rem,1.15vw,0.96rem); }
 }
 @media (max-width: 600px) {
   :root { --title-size: clamp(1.25rem,7vw,2.5rem); }
@@ -217,11 +217,11 @@ const PRESENTATION_CSS = `
 }
 
 /* ── Bullet list ── */
-.bullet-list { list-style: none; display: flex; flex-direction: column; gap: var(--element-gap); }
+.bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.45rem,1.1vw,1.1rem); }
 .bullet-list li {
   display: flex; align-items: flex-start; gap: 14px;
   font-family: var(--body-font); font-size: var(--body-size);
-  color: var(--content-bullet-color); line-height: 1.6;
+  color: var(--content-bullet-color); line-height: 1.5;
 }
 .bullet-list .dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 0.5em;
@@ -283,7 +283,7 @@ const PRESENTATION_CSS = `
 
 /* ── Feature grid ── */
 .feature-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: clamp(1rem, 2vw, 1.5rem);
 }
 .feature-card {
@@ -316,6 +316,7 @@ const PRESENTATION_CSS = `
 /* ── Image slide ── */
 .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--content-gap); flex: 1; align-items: center; }
 .image-side img { width: 100%; max-height: 50vh; object-fit: contain; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.image-side .caption { margin-top: 0.5rem; font-size: clamp(0.55rem,1vw,0.8rem); opacity: 0.68; text-align: center; }
 
 /* ── Quote slide ── */
 .quote-slide { background: var(--title-bg); position: relative; overflow: hidden; }
@@ -355,15 +356,15 @@ const PRESENTATION_CSS = `
 .timeline-nodes { display: flex; justify-content: space-between; width: 76%; position: relative; z-index: 1; }
 .timeline-node { text-align: center; width: 18%; }
 .timeline-circle { width: clamp(28px,4vw,44px); height: clamp(28px,4vw,44px); border-radius: 50%; background: var(--title-accent-bg); color: var(--title-accent-color); display: flex; align-items: center; justify-content: center; font-family: var(--display-font); font-size: clamp(12px,1.5vw,18px); font-weight: 700; margin: 0 auto clamp(8px,1.5vh,14px); }
-.timeline-step-title { font-family: var(--body-font); font-size: clamp(10px,1.2vw,14px); font-weight: 700; color: var(--content-title-color); margin-bottom: 4px; }
-.timeline-step-desc { font-family: var(--body-font); font-size: clamp(9px,1vw,12px); color: var(--content-bullet-color); line-height: 1.4; }
+.timeline-step-title { font-family: var(--body-font); font-size: clamp(13px,1.45vw,18px); font-weight: 700; color: var(--content-title-color); margin-bottom: 4px; }
+.timeline-step-desc { font-family: var(--body-font); font-size: clamp(12px,1.3vw,16px); color: var(--content-bullet-color); line-height: 1.4; }
 
 /* ── Callout slide ── */
 .callout-body { flex: 1; display: flex; gap: clamp(12px,2vw,24px); padding: 0 var(--slide-padding) var(--slide-padding); }
 .callout-main { flex: 7; display: flex; flex-direction: column; justify-content: center; }
 .callout-sidebar { flex: 3; background: var(--title-accent-bg); border-radius: 16px; padding: clamp(14px,2vw,28px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: var(--title-accent-color); position: relative; overflow: hidden; }
-.callout-label { font-size: clamp(9px,0.8vw,11px); font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: clamp(10px,2vh,18px); font-family: var(--body-font); }
-.callout-text { font-family: var(--display-font); font-size: clamp(14px,1.8vw,22px); font-weight: 700; line-height: 1.5; }
+.callout-label { font-size: clamp(11px,1vw,14px); font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: clamp(10px,2vh,18px); font-family: var(--body-font); }
+.callout-text { font-family: var(--display-font); font-size: clamp(17px,2.1vw,27px); font-weight: 700; line-height: 1.45; }
 
 /* ── Statement slide ── */
 .statement-slide { background: var(--title-bg); position: relative; overflow: hidden; }
@@ -570,7 +571,7 @@ function generateFeatureGridSlide(slide: SlideData, slideNumber: number): string
 }
 
 function generateImageSlide(slide: SlideData, slideNumber: number): string {
-  const { title, body, imageUrl } = slide.content
+  const { title, body, imageUrl, subtitle } = slide.content
   const safeUrl = sanitizeUrl(imageUrl || '')
   return `<section class="slide content-slide">
   <div class="slide-bg-number">${slideNumber}</div>
@@ -581,6 +582,7 @@ function generateImageSlide(slide: SlideData, slideNumber: number): string {
       <div class="text-side reveal">${generateBullets(body || [])}</div>
       <div class="image-side reveal">
         ${safeUrl ? `<img src="${safeUrl}" alt="${esc(title)}" loading="lazy" />` : ''}
+        ${subtitle ? `<p class="caption">${esc(subtitle)}</p>` : ''}
       </div>
     </div>
   </div>

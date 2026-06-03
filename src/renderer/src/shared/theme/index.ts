@@ -82,8 +82,8 @@ export const darkTheme = {
   transitionSlow: '0.3s cubic-bezier(0.4, 0, 0.2, 1)'
 } as const
 
-export type Theme = typeof theme
+export type Theme = typeof theme | typeof darkTheme
 
 export function getTheme(mode: 'light' | 'dark'): Theme {
-  return mode === 'dark' ? (darkTheme as Theme) : theme
+  return mode === 'dark' ? darkTheme : theme
 }

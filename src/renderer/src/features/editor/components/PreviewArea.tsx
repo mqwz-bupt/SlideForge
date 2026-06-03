@@ -276,6 +276,10 @@ export function PreviewArea() {
   const slides = project.slides
   const currentSlide = slides[activeSlideIndex] || slides[0]
   const totalSlides = slides.length
+  const getSectionNumber = (sectionId: string) => {
+    const section = project.documentOutline.sections.find((s) => s.id === sectionId)
+    return section?.order
+  }
 
   const syncOutlineFromSlide = useCallback((idx: number) => {
     setActiveSlideIndex(idx)
@@ -376,7 +380,12 @@ export function PreviewArea() {
       <SlideMain onWheel={handleWheel}>
         <SlideCanvas style={cssVars}>
           <SlideTransition key={activeSlideIndex} direction={slideDirection}>
-            <SlideRenderer slide={currentSlide} slideIndex={activeSlideIndex} totalSlides={totalSlides} />
+            <SlideRenderer
+              slide={currentSlide}
+              slideIndex={activeSlideIndex}
+              totalSlides={totalSlides}
+              sectionNumber={getSectionNumber(currentSlide.sectionId)}
+            />
           </SlideTransition>
         </SlideCanvas>
       </SlideMain>
@@ -385,7 +394,12 @@ export function PreviewArea() {
         {slides.map((slide, i) => (
           <ThumbItem key={slide.id} ref={(el) => { if (i === activeSlideIndex) activeThumbRef.current = el }} active={activeSlideIndex === i} onClick={() => handleThumbClick(i)}>
             <ThumbInner style={cssVars}>
-              <SlideRenderer slide={slide} slideIndex={i} totalSlides={totalSlides} />
+              <SlideRenderer
+                slide={slide}
+                slideIndex={i}
+                totalSlides={totalSlides}
+                sectionNumber={getSectionNumber(slide.sectionId)}
+              />
             </ThumbInner>
             <ThumbNum>{i + 1}</ThumbNum>
           </ThumbItem>
@@ -401,7 +415,12 @@ export function PreviewArea() {
           <FullscreenWrapper style={{ width: 960 * fsScale, height: 540 * fsScale }} onClick={(e) => e.stopPropagation()}>
             <FullscreenCanvas style={{ ...cssVars, transform: `scale(${fsScale})` }}>
               <SlideTransition key={activeSlideIndex} direction={slideDirection}>
-                <SlideRenderer slide={currentSlide} slideIndex={activeSlideIndex} totalSlides={totalSlides} />
+                <SlideRenderer
+                  slide={currentSlide}
+                  slideIndex={activeSlideIndex}
+                  totalSlides={totalSlides}
+                  sectionNumber={getSectionNumber(currentSlide.sectionId)}
+                />
               </SlideTransition>
             </FullscreenCanvas>
           </FullscreenWrapper>

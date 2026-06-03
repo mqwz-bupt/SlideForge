@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, type CSSProperties, type ElementType } from 'react'
 import styled from '@emotion/styled'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
@@ -24,7 +24,7 @@ function renderMath(text: string): string {
 }
 
 /** React component: renders text with math support */
-export function MathText({ text, as: Tag = 'span', style }: { text: string; as?: keyof JSX.IntrinsicElements; style?: React.CSSProperties }) {
+export function MathText({ text, as: Tag = 'span', style }: { text: string; as?: ElementType; style?: CSSProperties }) {
   const html = useMemo(() => renderMath(text), [text])
   return <Tag style={style} dangerouslySetInnerHTML={{ __html: html }} />
 }
@@ -148,7 +148,7 @@ export const ContentTitle = styled.h2`
 
 const ContentBody = styled.ul`
   list-style: none; padding: 0; margin: 0;
-  display: flex; flex-direction: column; gap: clamp(4px, 0.8vh, 10px);
+  display: flex; flex-direction: column; gap: clamp(5px, 1vh, 12px);
   flex: 1; min-height: 0;
   max-height: 100%;
   overflow: hidden;
@@ -157,8 +157,8 @@ const ContentBody = styled.ul`
 
 const ContentBullet = styled.li`
   font-family: var(--body-font);
-  font-size: clamp(13px, 1.8vw, 22px);
-  color: var(--content-bullet-color); line-height: 1.5;
+  font-size: clamp(15px, 2vw, 25px);
+  color: var(--content-bullet-color); line-height: 1.48;
   display: flex; align-items: flex-start; gap: clamp(6px, 0.8vw, 12px);
   &::before {
     content: '';
@@ -168,7 +168,7 @@ const ContentBullet = styled.li`
     margin-top: clamp(4px, 0.5vw, 8px);
   }
   @media (max-height: 600px) {
-    font-size: clamp(11px, 1.3vw, 15px);
+    font-size: clamp(12px, 1.45vw, 17px);
     line-height: 1.35;
   }
 `
@@ -211,13 +211,13 @@ const TwoColCardTitle = styled.h3`
 
 const TwoColCardBody = styled.ul`
   list-style: none; padding: 0; margin: 0;
-  display: flex; flex-direction: column; gap: clamp(3px, 0.6vh, 8px);
+  display: flex; flex-direction: column; gap: clamp(4px, 0.8vh, 10px);
   flex: 1; min-height: 0; overflow: hidden;
 `
 
 const TwoColBullet = styled.li`
   font-family: var(--body-font);
-  font-size: clamp(11px, 1.3vw, 16px);
+  font-size: clamp(13px, 1.55vw, 19px);
   color: var(--content-bullet-color); line-height: 1.45;
   display: flex; align-items: flex-start; gap: clamp(4px, 0.5vw, 8px);
   &::before {
@@ -263,7 +263,7 @@ const HighlightBody = styled.ul`
 
 const HighlightPill = styled.li`
   font-family: var(--body-font);
-  font-size: clamp(11px, 1.2vw, 15px);
+  font-size: clamp(13px, 1.45vw, 18px);
   color: var(--content-bullet-color);
   background: var(--card-bg, rgba(0,0,0,0.03));
   border: 1px solid var(--card-border, rgba(0,0,0,0.06));
@@ -304,7 +304,7 @@ const ImageRightCol = styled.div`
 
 const ImageCaption = styled.p`
   font-family: var(--body-font);
-  font-size: clamp(9px, 1vw, 13px);
+  font-size: clamp(11px, 1.2vw, 15px);
   color: var(--content-bullet-color);
   margin-top: clamp(6px, 1vh, 12px);
   text-align: center;
@@ -346,7 +346,7 @@ const FeatureName = styled.span`
 `
 
 const FeatureDesc = styled.span`
-  font-family: var(--body-font); font-size: clamp(10px, 1.3vw, 16px);
+  font-family: var(--body-font); font-size: clamp(12px, 1.55vw, 19px);
   color: var(--content-bullet-color); line-height: 1.4;
 `
 
@@ -405,7 +405,7 @@ const BigNumberPills = styled.div`
 
 const BigNumberPill = styled.div`
   padding: 6px 16px; border-radius: 20px;
-  font-size: clamp(11px, 1.2vw, 15px); font-family: var(--body-font);
+  font-size: clamp(13px, 1.45vw, 18px); font-family: var(--body-font);
   color: var(--content-bullet-color);
   background: rgba(128,128,128,0.06);
   border: 1px solid rgba(128,128,128,0.1);
@@ -452,12 +452,12 @@ const TimelineCircle = styled.div`
 `
 
 const TimelineTitle = styled.div`
-  font-family: var(--body-font); font-size: clamp(11px, 1.3vw, 15px);
+  font-family: var(--body-font); font-size: clamp(13px, 1.55vw, 18px);
   font-weight: 700; color: var(--content-title-color); margin-bottom: 3px;
 `
 
 const TimelineDesc = styled.div`
-  font-family: var(--body-font); font-size: clamp(10px, 1.1vw, 13px);
+  font-family: var(--body-font); font-size: clamp(12px, 1.35vw, 16px);
   color: var(--content-bullet-color); line-height: 1.4;
 `
 
@@ -499,7 +499,7 @@ const CalloutLabel = styled.div`
 `
 
 const CalloutText = styled.div`
-  font-family: var(--display-font); font-size: clamp(14px, 2vw, 22px);
+  font-family: var(--display-font); font-size: clamp(16px, 2.25vw, 26px);
   font-weight: 700; line-height: 1.5;
 `
 
@@ -542,7 +542,17 @@ const SlideNotes = styled.div`
 `
 
 /* ========== SLIDE RENDERER ========== */
-export function SlideRenderer({ slide, slideIndex, totalSlides }: { slide: any; slideIndex: number; totalSlides: number }) {
+export function SlideRenderer({
+  slide,
+  slideIndex,
+  totalSlides,
+  sectionNumber
+}: {
+  slide: any
+  slideIndex: number
+  totalSlides: number
+  sectionNumber?: number
+}) {
   const layout = slide.layout || 'content'
   const content = slide.content
 
@@ -562,7 +572,7 @@ export function SlideRenderer({ slide, slideIndex, totalSlides }: { slide: any; 
   if (layout === 'section-divider') {
     return (
       <DividerRoot>
-        <DividerNumber>{String(slide.order || slideIndex + 1).padStart(2, '0')}</DividerNumber>
+        <DividerNumber>{sectionNumber ?? (slide.order || slideIndex + 1)}</DividerNumber>
         <DividerLine />
         <DividerTitle>{content.title}</DividerTitle>
         {content.subtitle && <DividerSubtitle>{content.subtitle}</DividerSubtitle>}

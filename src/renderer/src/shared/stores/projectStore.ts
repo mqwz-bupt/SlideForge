@@ -2,6 +2,34 @@ import { create } from 'zustand'
 import type { Project, RecentProject, ChatMessage, StylePreset, Section, Point, DocumentOutline, Slide } from '../types/project'
 import { mockProject, mockRecentProjects, mockChatMessages } from '../mocks/projectData'
 
+const LOCAL_PROJECTS_KEY = 'slideforge-local-projects'
+
+function getProjectApi() {
+  return (window as any).api?.project
+}
+
+function readLocalProjects(): Project[] {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+function writeLocalProjects(projects: Project[]) {
+  localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects))
+}
+
+function toRecentProject(project: Project): RecentProject {
+  return {
+    id: project.id,
+    name: project.name,
+    style: project.style,
+    slideCount: project.slides?.length ?? 0,
+    updatedAt: project.updatedAt
+  }
+}
+
 interface ProjectState {
   currentProject: Project | null
   recentProjects: RecentProject[]
@@ -314,8 +342,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     const { currentProject } = get()
     if (!currentProject) return
     try {
-      const api = (window as any).api
-      await api.project.save(currentProject)
+      const api = getProjectApi()
+      if (!api) {
+        const projects = readLocalProjects().filter((p) => p.id !== currentProject.id)
+        writeLocalProjects([currentProject, ...projects])
+        await get().loadRecentProjects()
+        return
+      }
+      await api.save(currentProject)
       await get().loadRecentProjects()
     } catch (e) {
       console.error('Failed to save project:', e)
@@ -324,8 +358,13 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   loadProjectById: async (id: string) => {
     try {
-      const api = (window as any).api
-      const result = await api.project.load(id)
+      const api = getProjectApi()
+      if (!api) {
+        const project = readLocalProjects().find((p) => p.id === id)
+        if (project) set({ currentProject: project, chatMessages: [] })
+        return
+      }
+      const result = await api.load(id)
       if (result.success && result.project) {
         set({ currentProject: result.project, chatMessages: [] })
       }
@@ -336,8 +375,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   loadRecentProjects: async () => {
     try {
-      const api = (window as any).api
-      const result = await api.project.list()
+      const api = getProjectApi()
+      if (!api) {
+        set({ recentProjects: readLocalProjects().map(toRecentProject) })
+        return
+      }
+      const result = await api.list()
       if (result.success) {
         set({ recentProjects: result.projects })
       }
@@ -348,8 +391,13 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   deleteProjectById: async (id: string) => {
     try {
-      const api = (window as any).api
-      await api.project.delete(id)
+      const api = getProjectApi()
+      if (!api) {
+        writeLocalProjects(readLocalProjects().filter((p) => p.id !== id))
+        await get().loadRecentProjects()
+        return
+      }
+      await api.delete(id)
       await get().loadRecentProjects()
     } catch (e) {
       console.error('Failed to delete project:', e)

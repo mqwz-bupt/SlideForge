@@ -87,6 +87,22 @@ function bulletTexts(items: string[], opts: { fontSize: number; fontFace: string
   }))
 }
 
+async function imageUrlToDataUri(url: string): Promise<string | null> {
+  if (url.startsWith('data:image/')) return url
+  if (!/^https?:\/\//i.test(url)) return null
+
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return null
+    const contentType = response.headers.get('content-type') || 'image/jpeg'
+    if (!contentType.startsWith('image/')) return null
+    const buffer = Buffer.from(await response.arrayBuffer())
+    return `data:${contentType};base64,${buffer.toString('base64')}`
+  } catch {
+    return null
+  }
+}
+
 // ── Layout generators ──
 
 function addTitleSlide(ctx: SlideContext, slide: SlideData) {
@@ -126,9 +142,9 @@ function addContentSlide(ctx: SlideContext, slide: SlideData) {
   s.addText(slide.content.title, { x: MARGIN, y: 0.35, w: CONTENT_W, h: 0.6, fontSize: 22, fontFace: df, color: C.contentTitle, bold: true })
   s.addShape(pptx.ShapeType.rect, { x: MARGIN, y: 1.0, w: 1.5, h: 0.04, fill: { color: C.headerBorder } })
   if (slide.content.body && slide.content.body.length > 0) {
-    const bodyH = Math.max(1.5, Math.min(slide.content.body.length * 0.55, 3.5))
+    const bodyH = Math.max(1.8, Math.min(slide.content.body.length * 0.65, 4.0))
     const bodyY = 1.0 + (SLIDE_H - 1.0 - bodyH) / 2
-    s.addText(bulletTexts(slide.content.body, { fontSize: 17, fontFace: bf, color: C.contentBullet, bulletSize: 18 }), { x: MARGIN + 0.2, y: bodyY, w: CONTENT_W - 0.4, h: bodyH, valign: 'middle' })
+    s.addText(bulletTexts(slide.content.body, { fontSize: 20, fontFace: bf, color: C.contentBullet, bulletSize: 20 }), { x: MARGIN + 0.2, y: bodyY, w: CONTENT_W - 0.4, h: bodyH, valign: 'middle' })
   }
   s.addShape(pptx.ShapeType.rect, { x: MARGIN, y: SLIDE_H - 0.15, w: CONTENT_W, h: 0.03, fill: { color: C.accentLighter } })
 }
@@ -147,10 +163,10 @@ function addTwoColumnSlide(ctx: SlideContext, slide: SlideData) {
   s.addShape(pptx.ShapeType.roundRect, { x: MARGIN, y: cardY, w: cardW, h: cardH, fill: { color: C.accentLighter }, rectRadius: 0.1 })
   s.addShape(pptx.ShapeType.rect, { x: MARGIN, y: cardY, w: cardW, h: 0.05, fill: { color: C.accentBg } })
   const liX = MARGIN + 0.25, liW = cardW - 0.5
-  if (slide.content.leftTitle) s.addText(slide.content.leftTitle, { x: liX, y: cardY + 0.2, w: liW, h: 0.35, fontSize: 14, fontFace: df, color: C.contentTitle, bold: true })
+  if (slide.content.leftTitle) s.addText(slide.content.leftTitle, { x: liX, y: cardY + 0.2, w: liW, h: 0.35, fontSize: 15, fontFace: df, color: C.contentTitle, bold: true })
   if (slide.content.leftBody && slide.content.leftBody.length > 0) {
-    const lbH = Math.max(1.0, Math.min(slide.content.leftBody.length * 0.5, cardH - 0.8))
-    s.addText(bulletTexts(slide.content.leftBody, { fontSize: 13, fontFace: bf, color: C.contentBullet, bulletSize: 14 }), { x: liX, y: cardY + 0.65 + (cardH - 0.65 - lbH) / 2, w: liW, h: lbH, valign: 'middle' })
+    const lbH = Math.max(1.2, Math.min(slide.content.leftBody.length * 0.58, cardH - 0.8))
+    s.addText(bulletTexts(slide.content.leftBody, { fontSize: 15, fontFace: bf, color: C.contentBullet, bulletSize: 16 }), { x: liX, y: cardY + 0.65 + (cardH - 0.65 - lbH) / 2, w: liW, h: lbH, valign: 'middle' })
   }
 
   // Right card
@@ -158,10 +174,10 @@ function addTwoColumnSlide(ctx: SlideContext, slide: SlideData) {
   s.addShape(pptx.ShapeType.roundRect, { x: rightX, y: cardY, w: cardW, h: cardH, fill: { color: C.accentLighter }, rectRadius: 0.1 })
   s.addShape(pptx.ShapeType.rect, { x: rightX, y: cardY, w: cardW, h: 0.05, fill: { color: C.accentBg } })
   const riX = rightX + 0.25
-  if (slide.content.rightTitle) s.addText(slide.content.rightTitle, { x: riX, y: cardY + 0.2, w: liW, h: 0.35, fontSize: 14, fontFace: df, color: C.contentTitle, bold: true })
+  if (slide.content.rightTitle) s.addText(slide.content.rightTitle, { x: riX, y: cardY + 0.2, w: liW, h: 0.35, fontSize: 15, fontFace: df, color: C.contentTitle, bold: true })
   if (slide.content.rightBody && slide.content.rightBody.length > 0) {
-    const rbH = Math.max(1.0, Math.min(slide.content.rightBody.length * 0.5, cardH - 0.8))
-    s.addText(bulletTexts(slide.content.rightBody, { fontSize: 13, fontFace: bf, color: C.contentBullet, bulletSize: 14 }), { x: riX, y: cardY + 0.65 + (cardH - 0.65 - rbH) / 2, w: liW, h: rbH, valign: 'middle' })
+    const rbH = Math.max(1.2, Math.min(slide.content.rightBody.length * 0.58, cardH - 0.8))
+    s.addText(bulletTexts(slide.content.rightBody, { fontSize: 15, fontFace: bf, color: C.contentBullet, bulletSize: 16 }), { x: riX, y: cardY + 0.65 + (cardH - 0.65 - rbH) / 2, w: liW, h: rbH, valign: 'middle' })
   }
 }
 
@@ -178,12 +194,12 @@ function addHighlightSlide(ctx: SlideContext, slide: SlideData) {
     const pillW = Math.min(7.0 / slide.content.body.length, 2.8)
     const startX = (SLIDE_W - slide.content.body.length * pillW) / 2
     slide.content.body.forEach((b, i) => {
-      s.addText(b, { x: startX + i * pillW + 0.06, y: 3.8, w: pillW - 0.12, h: 0.4, fontSize: 11, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, fill: { color: C.accentLighter }, rectRadius: 0.2, line: { color: C.accentLight, width: 0.5 } })
+      s.addText(b, { x: startX + i * pillW + 0.06, y: 3.8, w: pillW - 0.12, h: 0.45, fontSize: 13, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, fill: { color: C.accentLighter }, rectRadius: 0.2, line: { color: C.accentLight, width: 0.5 } })
     })
   }
 }
 
-function addImageSlide(ctx: SlideContext, slide: SlideData) {
+async function addImageSlide(ctx: SlideContext, slide: SlideData) {
   const { pptx, df, bf, C, SLIDE_H, MARGIN, CONTENT_W } = ctx
   const s = pptx.addSlide()
   s.background = { color: C.contentBg }
@@ -191,11 +207,14 @@ function addImageSlide(ctx: SlideContext, slide: SlideData) {
   s.addText(slide.content.title, { x: MARGIN, y: 0.35, w: CONTENT_W, h: 0.5, fontSize: 20, fontFace: df, color: C.contentTitle, bold: true })
   s.addShape(pptx.ShapeType.rect, { x: MARGIN, y: 0.9, w: 1.2, h: 0.04, fill: { color: C.headerBorder } })
   if (slide.content.body && slide.content.body.length > 0) {
-    const bodyH = Math.max(1.0, Math.min(slide.content.body.length * 0.5, 3.5))
-    s.addText(bulletTexts(slide.content.body, { fontSize: 13, fontFace: bf, color: C.contentBullet, bulletSize: 14 }), { x: MARGIN + 0.1, y: 1.2 + (SLIDE_H - 1.2 - bodyH) / 2, w: 4.0, h: bodyH, valign: 'middle' })
+    const bodyH = Math.max(1.2, Math.min(slide.content.body.length * 0.58, 3.7))
+    s.addText(bulletTexts(slide.content.body, { fontSize: 15, fontFace: bf, color: C.contentBullet, bulletSize: 16 }), { x: MARGIN + 0.1, y: 1.2 + (SLIDE_H - 1.2 - bodyH) / 2, w: 4.0, h: bodyH, valign: 'middle' })
   }
   if (slide.content.imageUrl) {
-    s.addImage({ path: slide.content.imageUrl, x: 5.2, y: 1.2, w: 4.2, h: 3.5, sizing: { type: 'contain', w: 4.2, h: 3.5 }, rounding: true })
+    const data = await imageUrlToDataUri(slide.content.imageUrl)
+    if (data) {
+      s.addImage({ data, x: 5.2, y: 1.2, w: 4.2, h: 3.5, sizing: { type: 'contain', w: 4.2, h: 3.5 }, rounding: true })
+    }
   }
 }
 
@@ -218,8 +237,8 @@ function addFeatureGridSlide(ctx: SlideContext, slide: SlideData) {
     const x = MARGIN + col * colW + 0.06, y = 1.1 + row * (rowH + 0.15)
     s.addShape(pptx.ShapeType.roundRect, { x, y, w: colW - 0.12, h: rowH, fill: { color: C.accentLighter }, rectRadius: 0.08 })
     s.addText(String(i + 1), { x: x + (colW - 0.12) / 2 - 0.2, y: y + 0.12, w: 0.4, h: 0.4, fontSize: 13, fontFace: df, color: C.accentColor, align: 'center', valign: 'middle', bold: true, shape: pptx.ShapeType.ellipse, fill: { color: C.accentBg } })
-    s.addText(f.name, { x: x + 0.1, y: y + 0.6, w: colW - 0.32, h: 0.3, fontSize: 12, fontFace: df, color: C.contentTitle, align: 'center', bold: true })
-    s.addText(f.desc, { x: x + 0.1, y: y + 0.95, w: colW - 0.32, h: rowH - 1.1, fontSize: 10, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'middle', lineSpacingMultiple: 1.2 })
+    s.addText(f.name, { x: x + 0.1, y: y + 0.6, w: colW - 0.32, h: 0.35, fontSize: 13, fontFace: df, color: C.contentTitle, align: 'center', bold: true })
+    s.addText(f.desc, { x: x + 0.1, y: y + 1.0, w: colW - 0.32, h: rowH - 1.1, fontSize: 12, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'middle', lineSpacingMultiple: 1.15 })
   })
 }
 
@@ -235,7 +254,7 @@ function addQuoteSlide(ctx: SlideContext, slide: SlideData) {
     s.addText(`\u2014 ${slide.content.title}`, { x: 1.4, y: 3.7, w: 7.6, h: 0.4, fontSize: 14, fontFace: bf, color: C.subtitleColor })
   }
   if (slide.content.body && slide.content.body.length > 0) {
-    s.addText(bulletTexts(slide.content.body, { fontSize: 12, fontFace: bf, color: C.subtitleColor, bulletSize: 12 }), { x: 1.4, y: 4.3, w: 7.6, h: 0.9, valign: 'middle' })
+    s.addText(bulletTexts(slide.content.body, { fontSize: 14, fontFace: bf, color: C.subtitleColor, bulletSize: 14 }), { x: 1.4, y: 4.25, w: 7.6, h: 1.0, valign: 'middle' })
   }
 }
 
@@ -252,7 +271,7 @@ function addBigNumberSlide(ctx: SlideContext, slide: SlideData) {
     const pillW = Math.min(6.0 / slide.content.body.length, 2.5)
     const startX = (SLIDE_W - slide.content.body.length * pillW) / 2
     slide.content.body.forEach((b, i) => {
-      s.addText(b, { x: startX + i * pillW + 0.06, y: 4.2, w: pillW - 0.12, h: 0.45, fontSize: 12, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, fill: { color: C.accentLighter }, rectRadius: 0.18, line: { color: C.accentLight, width: 0.5 } })
+      s.addText(b, { x: startX + i * pillW + 0.06, y: 4.2, w: pillW - 0.12, h: 0.48, fontSize: 14, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, fill: { color: C.accentLighter }, rectRadius: 0.18, line: { color: C.accentLight, width: 0.5 } })
     })
   }
   s.addShape(pptx.ShapeType.rect, { x: 3.0, y: SLIDE_H - 0.5, w: 4.0, h: 0.04, fill: { color: C.accentBg } })
@@ -272,8 +291,8 @@ function addTimelineSlide(ctx: SlideContext, slide: SlideData) {
   features.slice(0, 5).forEach((f, i) => {
     const nx = MARGIN + i * nodeW
     s.addText(String(i + 1), { x: nx + nodeW / 2 - 0.22, y: 2.2, w: 0.44, h: 0.44, fontSize: 13, fontFace: df, color: C.accentColor, align: 'center', valign: 'middle', bold: true, shape: pptx.ShapeType.ellipse, fill: { color: C.accentBg } })
-    s.addText(f.name, { x: nx + 0.1, y: 2.85, w: nodeW - 0.2, h: 0.35, fontSize: 12, fontFace: df, color: C.contentTitle, align: 'center', bold: true })
-    s.addText(f.desc, { x: nx + 0.1, y: 3.25, w: nodeW - 0.2, h: 1.8, fontSize: 10, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'top', lineSpacingMultiple: 1.2 })
+    s.addText(f.name, { x: nx + 0.1, y: 2.85, w: nodeW - 0.2, h: 0.4, fontSize: 13, fontFace: df, color: C.contentTitle, align: 'center', bold: true })
+    s.addText(f.desc, { x: nx + 0.1, y: 3.3, w: nodeW - 0.2, h: 1.8, fontSize: 12, fontFace: bf, color: C.contentBullet, align: 'center', valign: 'top', lineSpacingMultiple: 1.15 })
   })
 }
 
@@ -285,12 +304,12 @@ function addCalloutSlide(ctx: SlideContext, slide: SlideData) {
   s.addText(slide.content.title, { x: MARGIN, y: 0.35, w: CONTENT_W, h: 0.55, fontSize: 20, fontFace: df, color: C.contentTitle, bold: true })
   s.addShape(pptx.ShapeType.rect, { x: MARGIN, y: 0.95, w: 1.2, h: 0.04, fill: { color: C.headerBorder } })
   if (slide.content.body && slide.content.body.length > 0) {
-    const bodyH = Math.max(1.5, Math.min(slide.content.body.length * 0.6, 3.5))
-    s.addText(bulletTexts(slide.content.body, { fontSize: 15, fontFace: bf, color: C.contentBullet, bulletSize: 16 }), { x: MARGIN + 0.1, y: 1.2 + (SLIDE_H - 1.2 - bodyH) / 2, w: 5.3, h: bodyH, valign: 'middle' })
+    const bodyH = Math.max(1.8, Math.min(slide.content.body.length * 0.68, 3.7))
+    s.addText(bulletTexts(slide.content.body, { fontSize: 17, fontFace: bf, color: C.contentBullet, bulletSize: 18 }), { x: MARGIN + 0.1, y: 1.2 + (SLIDE_H - 1.2 - bodyH) / 2, w: 5.3, h: bodyH, valign: 'middle' })
   }
   s.addShape(pptx.ShapeType.roundRect, { x: 6.5, y: 1.2, w: 2.8, h: 3.8, fill: { color: C.accentBg }, rectRadius: 0.12 })
-  if (slide.content.accent) s.addText(slide.content.accent, { x: 6.7, y: 1.6, w: 2.4, h: 0.3, fontSize: 9, fontFace: bf, color: C.accentColor, align: 'center', bold: true })
-  if (slide.content.highlight) s.addText(slide.content.highlight, { x: 6.7, y: 2.1, w: 2.4, h: 2.5, fontSize: 16, fontFace: df, color: C.accentColor, align: 'center', valign: 'middle', bold: true })
+  if (slide.content.accent) s.addText(slide.content.accent, { x: 6.7, y: 1.6, w: 2.4, h: 0.3, fontSize: 11, fontFace: bf, color: C.accentColor, align: 'center', bold: true })
+  if (slide.content.highlight) s.addText(slide.content.highlight, { x: 6.7, y: 2.05, w: 2.4, h: 2.6, fontSize: 18, fontFace: df, color: C.accentColor, align: 'center', valign: 'middle', bold: true })
 }
 
 function addStatementSlide(ctx: SlideContext, slide: SlideData) {
@@ -340,7 +359,7 @@ export async function generatePPTX(project: ProjectData): Promise<Buffer> {
       case 'content': addContentSlide(ctx, slide); break
       case 'two-column': addTwoColumnSlide(ctx, slide); break
       case 'highlight': addHighlightSlide(ctx, slide); break
-      case 'image': addImageSlide(ctx, slide); break
+      case 'image': await addImageSlide(ctx, slide); break
       case 'feature-grid': addFeatureGridSlide(ctx, slide); break
       case 'quote': addQuoteSlide(ctx, slide); break
       case 'big-number': addBigNumberSlide(ctx, slide); break
