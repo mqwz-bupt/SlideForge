@@ -1,7 +1,6 @@
 import Database from 'better-sqlite3'
 import { join } from 'path'
 import { app } from 'electron'
-import { mkdirSync } from 'fs'
 
 let db: Database.Database | null = null
 

@@ -3,6 +3,7 @@ import styled from '@emotion/styled'
 import { useTranslation } from 'react-i18next'
 import { useProjectStore } from '@/shared/stores/projectStore'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
+import { parseAIJSON } from '@/shared/utils/slideUtils'
 import type { Section, Point, DocumentOutline } from '@/shared/types/project'
 
 const Inner = styled.div`
@@ -195,15 +196,6 @@ function genId(prefix: string) {
   return `${prefix}-${++_nextId}`
 }
 
-/** Extract JSON from AI response */
-function extractJSON(text: string): string {
-  const jsonMatch = text.match(/```json\s*([\s\S]*?)```/)
-  if (jsonMatch) return jsonMatch[1].trim()
-  const objMatch = text.match(/\{[\s\S]*\}/)
-  if (objMatch) return objMatch[0]
-  return text
-}
-
 /** Truncate text to roughly `maxChars` characters, keeping complete paragraphs */
 function truncateText(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text
@@ -224,6 +216,7 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
   const uploadedFileName = useProjectStore((s) => s.uploadedFileName)
   const setDocumentOutline = useProjectStore((s) => s.setDocumentOutline)
   const getAIConfig = useSettingsStore((s) => s.getAIConfig)
+  const setSettingsOpen = useSettingsStore((s) => s.setSettingsOpen)
 
   const [outline, setOutline] = useState<Section[]>([])
   const [loading, setLoading] = useState(true)
@@ -289,7 +282,7 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
 - 仔细阅读文档内容，每个 section 对应文档中的一个核心主题或章节
 - 每个 point 必须是文档中实际提到的具体内容，提炼为简短陈述（不超过20字）
 - 不要编造文档中没有的信息
-- 目标 4-8 个 section，每个 section 2-5 个 point
+- 目标 5-8 个 section，每个 section 3-5 个 point，避免大纲过短导致幻灯片空旷
 - title 字段给出文档的总结性标题
 
 输出格式（严格遵守）：
@@ -310,7 +303,7 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
 - 所有内容使用中文
 - 每个 section 对应主题的一个核心方面，按逻辑顺序排列
 - 每个 point 必须是具体、有实质内容的知识点（不能是空泛的套话）
-- 目标 4-6 个 section，每个 section 2-4 个 point
+- 目标 5-7 个 section，每个 section 3-5 个 point，确保内容足够支撑完整演示
 - title 字段给出演示文稿的正式标题
 
 用户选择的内容范围：${selectedScopes.join('、')}
@@ -328,8 +321,8 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
             }
           ]
 
-      const result = await window.api.ai.chat(config, messages, { temperature: 0.7, max_tokens: 4096 })
-      const data = JSON.parse(extractJSON(result.content))
+      const result = await window.api!.ai.chat(config, messages, { temperature: 0.7, max_tokens: 4096 })
+      const data = parseAIJSON(result.content, 'Outline generation result')
       setOutline(parseOutlineData(data))
     } catch (err: any) {
       setError(err.message || t('wizard.outlineGenError'))
@@ -374,8 +367,8 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
         }
       ]
 
-      const result = await window.api.ai.chat(config, messages, { temperature: 0.7, max_tokens: 4096 })
-      const data = JSON.parse(extractJSON(result.content))
+      const result = await window.api!.ai.chat(config, messages, { temperature: 0.7, max_tokens: 4096 })
+      const data = parseAIJSON(result.content, 'Outline adjustment result')
       setOutline(parseOutlineData(data))
       setAiInput('')
     } catch (err: any) {
@@ -480,6 +473,9 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
         </ErrorBox>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 12 }}>
           <BackBtn onClick={onBack}>{t('wizard.back')}</BackBtn>
+          {!getAIConfig().apiKey && (
+            <ConfirmBtn onClick={() => setSettingsOpen(true)}>{t('wizard.openSettings')}</ConfirmBtn>
+          )}
           <ConfirmBtn onClick={generateOutline}>{t('wizard.outlineRetry')}</ConfirmBtn>
         </div>
       </Inner>

@@ -13,7 +13,16 @@ export function repairJSON(json: string): string {
       inStr = !inStr
       result += s[i]; i++; continue
     }
-    if (inStr) { result += s[i]; i++; continue }
+    if (inStr) {
+      const code = s.charCodeAt(i)
+      if (s[i] === '\n' || s[i] === '\r' || s[i] === '\t' || code < 0x20) {
+        result += ' '
+      } else {
+        result += s[i]
+      }
+      i++
+      continue
+    }
 
     // After , [ or : — check for unquoted string value
     if (s[i] === ',' || s[i] === '[' || s[i] === ':') {
@@ -103,5 +112,47 @@ export function extractJSON(text: string): string {
   const repaired = repairJSON(raw)
   try { JSON.parse(repaired); return repaired } catch {}
 
+  const balanced = balanceJSON(repaired)
+  try { JSON.parse(balanced); return balanced } catch {}
+
   return raw
+}
+
+function balanceJSON(input: string): string {
+  let result = input.trim()
+  const stack: string[] = []
+  let inStr = false
+  let escaped = false
+
+  for (let i = 0; i < result.length; i++) {
+    const ch = result[i]
+    if (inStr) {
+      if (escaped) {
+        escaped = false
+      } else if (ch === '\\') {
+        escaped = true
+      } else if (ch === '"') {
+        inStr = false
+      }
+      continue
+    }
+
+    if (ch === '"') inStr = true
+    else if (ch === '{') stack.push('}')
+    else if (ch === '[') stack.push(']')
+    else if ((ch === '}' || ch === ']') && stack[stack.length - 1] === ch) stack.pop()
+  }
+
+  if (inStr) result += '"'
+  while (stack.length) result += stack.pop()
+  return result
+}
+
+export function parseAIJSON<T = any>(text: string, context = 'AI response'): T {
+  try {
+    return JSON.parse(extractJSON(text)) as T
+  } catch (err: any) {
+    const detail = err?.message ? ` (${err.message})` : ''
+    throw new Error(`${context} is not valid JSON${detail}. Please retry generation.`)
+  }
 }
