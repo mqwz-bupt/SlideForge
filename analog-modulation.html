@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模拟调制 — 通信原理</title>
+<style>
+/* ===========================================
+FONTS
+Crimson Pro for display, Noto Serif SC for Chinese body,
+JetBrains Mono for formulas
+=========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ===========================================
+VIEWPORT FITTING: MANDATORY BASE STYLES
+=========================================== */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+/* ===========================================
+CSS VARIABLES — Paper & Ink Theme
+=========================================== */
+:root {
+  --bg-primary: #F5F0E8;
+  --bg-warm: #EDE6D8;
+  --text-primary: #2C2418;
+  --text-secondary: #7A6E5D;
+  --accent: #8B4513;
+  --accent-light: rgba(139, 69, 19, 0.1);
+  --accent-medium: rgba(139, 69, 19, 0.25);
+  --ink: #1A1610;
+  --divider: rgba(139, 69, 19, 0.15);
+  --card-bg: rgba(237, 230, 216, 0.6);
+  --font-display: 'Crimson Pro', 'Noto Serif SC', serif;
+  --font-body: 'Noto Serif SC', 'Crimson Pro', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Responsive typography */
+  --title-size: clamp(1.8rem, 5vw, 3.5rem);
+  --h2-size: clamp(1.3rem, 3.5vw, 2.2rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.5rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.6rem, 1vw, 0.85rem);
+  --mono-size: clamp(0.65rem, 1.2vw, 0.95rem);
+
+  /* Spacing */
+  --slide-padding: clamp(1.2rem, 4vw, 3.5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.3rem, 1vw, 0.8rem);
+}
+
+/* ===========================================
+SLIDE BASE
+=========================================== */
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg-primary);
+}
+
+/* Paper texture overlay */
+.slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bg-warm);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===========================================
+COMMON ELEMENTS
+=========================================== */
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: 0 var(--slide-padding);
+  position: relative;
+  z-index: 1;
+}
+
+.header-area {
+  padding: clamp(0.8rem, 2vw, 1.5rem) var(--slide-padding);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.chapter-label {
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.slide-num {
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+}
+
+.bottom-bar {
+  padding: clamp(0.5rem, 1.5vw, 1rem) var(--slide-padding);
+  border-top: 1px solid var(--divider);
+  margin: 0 var(--slide-padding);
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.bottom-bar span {
+  font-family: var(--font-mono);
+  font-size: clamp(0.5rem, 0.8vw, 0.65rem);
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+}
+
+/* Accent side line */
+.side-line {
+  position: absolute;
+  left: calc(var(--slide-padding) - 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 60%;
+  background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+  opacity: 0.4;
+  z-index: 1;
+}
+
+/* ===========================================
+TYPOGRAPHY
+=========================================== */
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--title-size);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--element-gap);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--h2-size);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: var(--element-gap);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: var(--element-gap);
+}
+
+p, li {
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.en {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+/* ===========================================
+FORMULA BOX
+=========================================== */
+.formula-box {
+  background: var(--card-bg);
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  padding: clamp(0.6rem, 1.5vw, 1.2rem) clamp(0.8rem, 2vw, 1.5rem);
+  margin: var(--element-gap) 0;
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.8;
+}
+
+.formula-box .label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  margin-bottom: 0.3em;
+  text-align: left;
+}
+
+/* ===========================================
+CARDS / GRID
+=========================================== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: clamp(0.5rem, 1.2vw, 1rem);
+  margin-top: var(--element-gap);
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  padding: clamp(0.6rem, 1.5vw, 1.2rem);
+}
+
+.card h3 {
+  font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+  margin-bottom: 0.3em;
+}
+
+.card p {
+  font-size: var(--small-size);
+  line-height: 1.6;
+}
+
+/* ===========================================
+LISTS
+=========================================== */
+.content-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.3rem, 0.8vw, 0.6rem);
+}
+
+.content-list li {
+  padding-left: 1.5em;
+  position: relative;
+}
+
+.content-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+/* ===========================================
+TWO COLUMN LAYOUT
+=========================================== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 3vw, 2.5rem);
+}
+
+/* ===========================================
+TAG / PILL
+=========================================== */
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--accent);
+  border: 1px solid var(--accent-medium);
+  padding: 0.2em 0.8em;
+  border-radius: 2px;
+  margin-bottom: var(--element-gap);
+}
+
+/* ===========================================
+COMPARISON TABLE
+=========================================== */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  margin-top: var(--element-gap);
+}
+
+.compare-table th {
+  text-align: left;
+  padding: clamp(0.3rem, 0.8vw, 0.6rem);
+  border-bottom: 2px solid var(--accent-medium);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--small-size);
+}
+
+.compare-table td {
+  padding: clamp(0.3rem, 0.8vw, 0.6rem);
+  border-bottom: 1px solid var(--divider);
+  color: var(--text-secondary);
+}
+
+/* ===========================================
+ANIMATIONS — Reveal on scroll
+=========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.d1 { transition-delay: 0.1s; }
+.reveal.d2 { transition-delay: 0.2s; }
+.reveal.d3 { transition-delay: 0.3s; }
+.reveal.d4 { transition-delay: 0.4s; }
+.reveal.d5 { transition-delay: 0.5s; }
+.reveal.d6 { transition-delay: 0.6s; }
+
+.visible .reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: opacity 0.3s ease;
+    transform: none;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ===========================================
+PROGRESS BAR
+=========================================== */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 100;
+  transition: width 0.3s ease;
+}
+
+/* ===========================================
+NAV DOTS
+=========================================== */
+.nav-dots {
+  position: fixed;
+  right: clamp(8px, 1.5vw, 16px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-medium);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.nav-dot.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.3);
+}
+
+/* ===========================================
+RESPONSIVE BREAKPOINTS
+=========================================== */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.8rem, 3vw, 2rem);
+    --content-gap: clamp(0.3rem, 1.5vw, 0.8rem);
+    --title-size: clamp(1.5rem, 4.5vw, 2.5rem);
+    --h2-size: clamp(1.1rem, 3vw, 1.75rem);
+  }
+}
+
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.6rem, 2.5vw, 1.5rem);
+    --content-gap: clamp(0.2rem, 1vw, 0.5rem);
+    --title-size: clamp(1.2rem, 4vw, 2rem);
+    --body-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  }
+  .nav-dots { display: none; }
+}
+
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 1rem);
+    --title-size: clamp(1rem, 3.5vw, 1.5rem);
+  }
+}
+
+@media (max-width: 600px) {
+  .two-col { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+/* ===========================================
+TITLE SLIDE — special decorative elements
+=========================================== */
+.title-slide .slide-content {
+  align-items: flex-start;
+}
+
+.title-slide .ink-blot {
+  position: absolute;
+  top: 15%;
+  right: 8%;
+  width: clamp(80px, 18vw, 250px);
+  height: clamp(80px, 18vw, 250px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,69,19,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.title-slide .formula-watermark {
+  position: absolute;
+  bottom: clamp(1.5rem, 4vw, 3rem);
+  right: var(--slide-padding);
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1.2vw, 1rem);
+  color: rgba(139, 69, 19, 0.2);
+}
+
+/* ===========================================
+SECTION DIVIDER SLIDES
+=========================================== */
+.section-slide .slide-content {
+  align-items: center;
+  text-align: center;
+}
+
+.section-slide .section-number {
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1.5vw, 1.1rem);
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  margin-bottom: var(--element-gap);
+}
+
+.section-slide h2 {
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  margin-bottom: var(--element-gap);
+}
+
+.section-slide .en {
+  font-size: clamp(0.9rem, 2vw, 1.4rem);
+}
+
+/* ===========================================
+WAVEFORM PLACEHOLDER (CSS art)
+=========================================== */
+.waveform {
+  width: 100%;
+  max-height: min(25vh, 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--element-gap) 0;
+  position: relative;
+}
+
+.waveform svg {
+  width: 100%;
+  max-height: min(25vh, 180px);
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- =========================================
+     SLIDE 1: Title
+     ========================================= -->
+<section class="slide title-slide" id="slide-1">
+  <div class="header-area">
+    <span class="chapter-label">Chapter III</span>
+    <span class="slide-num">01 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="ink-blot"></div>
+    <div class="side-line"></div>
+    <div class="reveal">
+      <h1>模拟调制</h1>
+      <p class="en" style="font-size: clamp(0.9rem, 2vw, 1.5rem); margin-bottom: var(--content-gap);">Analog Modulation</p>
+    </div>
+    <p class="reveal d2" style="max-width: 520px; line-height: 1.8;">
+      从幅度调制到角度调制，<br>系统探索模拟通信信号传输的核心原理
+    </p>
+    <div class="formula-watermark reveal d3">
+      s(t) = A(t) · cos(2πf<sub>c</sub>t + φ(t))
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>2026</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 2: What is Modulation
+     ========================================= -->
+<section class="slide" id="slide-2">
+  <div class="header-area">
+    <span class="chapter-label">概述</span>
+    <span class="slide-num">02 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">什么是调制？</h2>
+    <p class="reveal d1" style="max-width: 600px;">
+      调制是将信息（基带信号）加载到高频载波上的过程，<br>
+      使信号适合在信道中有效传输。
+    </p>
+    <div class="formula-box reveal d2">
+      <span class="label">调制的一般模型</span>
+      s(t) = A · m(t) · cos(2πf<sub>c</sub>t + φ)
+    </div>
+    <div class="card-grid reveal d3">
+      <div class="card">
+        <h3>为何调制？</h3>
+        <p>天线尺寸匹配、频分复用、提高抗干扰能力</p>
+      </div>
+      <div class="card">
+        <h3>载波信号</h3>
+        <p>高频正弦波 c(t) = A·cos(2πf<sub>c</sub>t+φ)，提供传输载体</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>模拟调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 3: Modulation Classification
+     ========================================= -->
+<section class="slide" id="slide-3">
+  <div class="header-area">
+    <span class="chapter-label">分类</span>
+    <span class="slide-num">03 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">模拟调制的分类</h2>
+    <p class="reveal d1 en">Classification of Analog Modulation</p>
+    <div class="card-grid reveal d2" style="grid-template-columns: 1fr 1fr;">
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <h3>幅度调制 <span class="en">AM</span></h3>
+        <ul class="content-list" style="margin-top: 0.4em;">
+          <li>载波幅度随基带信号变化</li>
+          <li>标准 AM、DSB-SC、SSB、VSB</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--accent-medium);">
+        <h3>角度调制 <span class="en">Angle</span></h3>
+        <ul class="content-list" style="margin-top: 0.4em;">
+          <li>载波相位/频率随基带信号变化</li>
+          <li>频率调制 FM、相位调制 PM</li>
+        </ul>
+      </div>
+    </div>
+    <p class="reveal d3" style="font-size: var(--small-size); margin-top: var(--element-gap);">
+      幅度调制属线性调制，角度调制属非线性调制。
+    </p>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>模拟调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 4: Section — AM
+     ========================================= -->
+<section class="slide section-slide" id="slide-4">
+  <div class="header-area">
+    <span class="chapter-label">Part I</span>
+    <span class="slide-num">04 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="reveal">
+      <p class="section-number">Part I</p>
+    </div>
+    <h2 class="reveal d1">幅度调制</h2>
+    <p class="reveal d2 en">Amplitude Modulation</p>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>模拟调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 5: Standard AM
+     ========================================= -->
+<section class="slide" id="slide-5">
+  <div class="header-area">
+    <span class="chapter-label">AM</span>
+    <span class="slide-num">05 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">标准调幅 <span class="en">AM</span></h2>
+    <div class="formula-box reveal d1">
+      <span class="label">标准 AM 时域表达式</span>
+      s<sub>AM</sub>(t) = [A<sub>0</sub> + m(t)] · cos(2πf<sub>c</sub>t)
+    </div>
+    <div class="two-col reveal d2">
+      <div>
+        <h3>关键参数</h3>
+        <ul class="content-list">
+          <li>A<sub>0</sub> — 直流偏置（载波分量）</li>
+          <li>m(t) — 基带调制信号</li>
+          <li>f<sub>c</sub> — 载波频率</li>
+          <li>调幅系数 m<sub>a</sub> = |m(t)|<sub>max</sub> / A<sub>0</sub></li>
+        </ul>
+      </div>
+      <div>
+        <h3>特点</h3>
+        <ul class="content-list">
+          <li>包含载波分量，功率效率低</li>
+          <li>包络检波即可解调</li>
+          <li>当 m<sub>a</sub> &le; 1 时无过调制失真</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>幅度调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 6: AM Spectrum
+     ========================================= -->
+<section class="slide" id="slide-6">
+  <div class="header-area">
+    <span class="chapter-label">AM · 频域</span>
+    <span class="slide-num">06 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">AM 的频谱分析</h2>
+    <p class="reveal d1 en">Spectrum of Standard AM</p>
+    <div class="formula-box reveal d2">
+      <span class="label">AM 频谱（设基带带宽为 f<sub>H</sub>）</span>
+      S<sub>AM</sub>(f) = A<sub>0</sub>/2 · [δ(f+f<sub>c</sub>) + δ(f-f<sub>c</sub>)] + 1/2 · [M(f+f<sub>c</sub>) + M(f-f<sub>c</sub>)]
+    </div>
+    <div class="card-grid reveal d3">
+      <div class="card">
+        <h3>带宽</h3>
+        <p>B<sub>AM</sub> = 2f<sub>H</sub><br>上下边带各占 f<sub>H</sub></p>
+      </div>
+      <div class="card">
+        <h3>功率分配</h3>
+        <p>载波功率 P<sub>c</sub> = A<sub>0</sub>²/2<br>边带功率 P<sub>SB</sub> = m<sub>a</sub>²·A<sub>0</sub>²/4</p>
+      </div>
+      <div class="card">
+        <h3>效率</h3>
+        <p>η = P<sub>SB</sub>/P<sub>Total</sub><br>满调幅时 η ≤ 33.3%</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>幅度调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 7: DSB-SC
+     ========================================= -->
+<section class="slide" id="slide-7">
+  <div class="header-area">
+    <span class="chapter-label">AM</span>
+    <span class="slide-num">07 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">双边带抑制载波 <span class="en">DSB-SC</span></h2>
+    <div class="formula-box reveal d1">
+      <span class="label">DSB-SC 时域表达式</span>
+      s<sub>DSB</sub>(t) = m(t) · cos(2πf<sub>c</sub>t)
+    </div>
+    <div class="two-col reveal d2">
+      <div>
+        <h3>与标准 AM 的区别</h3>
+        <ul class="content-list">
+          <li>无载波分量（去除 A<sub>0</sub>）</li>
+          <li>功率效率 = 100%</li>
+          <li>必须使用相干解调</li>
+        </ul>
+      </div>
+      <div>
+        <h3>相干解调</h3>
+        <ul class="content-list">
+          <li>本地恢复同频同相载波</li>
+          <li>乘以 cos(2πf<sub>c</sub>t) 后低通滤波</li>
+          <li>存在相位模糊问题</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>幅度调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 8: SSB & VSB
+     ========================================= -->
+<section class="slide" id="slide-8">
+  <div class="header-area">
+    <span class="chapter-label">AM</span>
+    <span class="slide-num">08 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">单边带 SSB 与残留边带 VSB</h2>
+    <div class="card-grid reveal d1" style="grid-template-columns: 1fr 1fr;">
+      <div class="card">
+        <h3>SSB — 单边带调制</h3>
+        <p style="margin-bottom: 0.5em;">仅传输一个边带（上边带或下边带）</p>
+        <div class="formula-box" style="padding: 0.5em 0.8em; margin: 0.3em 0;">
+          B<sub>SSB</sub> = f<sub>H</sub>（带宽减半）
+        </div>
+        <ul class="content-list" style="margin-top: 0.3em;">
+          <li>频带利用率最高</li>
+          <li>需滤波法或相移法产生</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>VSB — 残留边带调制</h3>
+        <p style="margin-bottom: 0.5em;">保留一个完整边带 + 另一边带的残余</p>
+        <div class="formula-box" style="padding: 0.5em 0.8em; margin: 0.3em 0;">
+          f<sub>H</sub> &lt; B<sub>VSB</sub> &lt; 2f<sub>H</sub>
+        </div>
+        <ul class="content-list" style="margin-top: 0.3em;">
+          <li>折中方案，易于滤波实现</li>
+          <li>应用于模拟电视视频信号传输</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>幅度调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 9: Section — Angle Modulation
+     ========================================= -->
+<section class="slide section-slide" id="slide-9">
+  <div class="header-area">
+    <span class="chapter-label">Part II</span>
+    <span class="slide-num">09 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="reveal">
+      <p class="section-number">Part II</p>
+    </div>
+    <h2 class="reveal d1">角度调制</h2>
+    <p class="reveal d2 en">Angle Modulation</p>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>模拟调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 10: FM Principle
+     ========================================= -->
+<section class="slide" id="slide-10">
+  <div class="header-area">
+    <span class="chapter-label">FM</span>
+    <span class="slide-num">10 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">频率调制 <span class="en">FM</span> 原理</h2>
+    <div class="formula-box reveal d1">
+      <span class="label">FM 信号一般表达式</span>
+      s<sub>FM</sub>(t) = A · cos[2πf<sub>c</sub>t + 2πk<sub>f</sub> ∫m(τ)dτ]
+    </div>
+    <div class="formula-box reveal d2" style="margin-top: var(--element-gap);">
+      <span class="label">单音 FM（设 m(t) = A<sub>m</sub>cos 2πf<sub>m</sub>t）</span>
+      s<sub>FM</sub>(t) = A · cos[2πf<sub>c</sub>t + β·sin(2πf<sub>m</sub>t)]<br>
+      其中 β = k<sub>f</sub>·A<sub>m</sub>/f<sub>m</sub> 为调频指数
+    </div>
+    <ul class="content-list reveal d3">
+      <li>k<sub>f</sub> — 频偏常数（Hz/V）</li>
+      <li>β — 调频指数，反映调制深度</li>
+      <li>FM 信号的幅度恒定，信息承载在瞬时频率中</li>
+    </ul>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>角度调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 11: FM Spectrum & Carson Bandwidth
+     ========================================= -->
+<section class="slide" id="slide-11">
+  <div class="header-area">
+    <span class="chapter-label">FM · 频域</span>
+    <span class="slide-num">11 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">FM 的频谱与带宽</h2>
+    <p class="reveal d1 en">FM Spectrum and Carson's Rule</p>
+    <div class="formula-box reveal d2">
+      <span class="label">卡逊带宽公式</span>
+      B<sub>FM</sub> ≈ 2(β + 1) · f<sub>m</sub> = 2(Δf + f<sub>m</sub>)
+    </div>
+    <div class="card-grid reveal d3">
+      <div class="card">
+        <h3>窄带 FM (β &lt;&lt; 1)</h3>
+        <p>B ≈ 2f<sub>m</sub><br>频谱类似 AM，带宽与 AM 相近</p>
+      </div>
+      <div class="card">
+        <h3>宽带 FM (β &gt;&gt; 1)</h3>
+        <p>B ≈ 2Δf<br>带宽主要由频偏决定，远大于基带</p>
+      </div>
+    </div>
+    <p class="reveal d4" style="font-size: var(--small-size); margin-top: var(--element-gap);">
+      Δf = k<sub>f</sub>·A<sub>m</sub> 为最大频偏。FM 以带宽换取抗噪声性能的提升。
+    </p>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>角度调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 12: Phase Modulation
+     ========================================= -->
+<section class="slide" id="slide-12">
+  <div class="header-area">
+    <span class="chapter-label">PM</span>
+    <span class="slide-num">12 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">相位调制 <span class="en">PM</span></h2>
+    <div class="formula-box reveal d1">
+      <span class="label">PM 信号表达式</span>
+      s<sub>PM</sub>(t) = A · cos[2πf<sub>c</sub>t + k<sub>p</sub>·m(t)]
+    </div>
+    <div class="two-col reveal d2">
+      <div>
+        <h3>PM 的特点</h3>
+        <ul class="content-list">
+          <li>k<sub>p</sub> — 相移常数（rad/V）</li>
+          <li>瞬时相位随 m(t) 线性变化</li>
+          <li>带宽公式同 FM 卡逊规则</li>
+        </ul>
+      </div>
+      <div>
+        <h3>FM 与 PM 的关系</h3>
+        <ul class="content-list">
+          <li>对 m(t) 先积分再调相 → FM</li>
+          <li>对 m(t) 先微分再调频 → PM</li>
+          <li>两者数学上等价，可互相转换</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>角度调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 13: Section — Spectrum Analysis
+     ========================================= -->
+<section class="slide section-slide" id="slide-13">
+  <div class="header-area">
+    <span class="chapter-label">Part III</span>
+    <span class="slide-num">13 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="reveal">
+      <p class="section-number">Part III</p>
+    </div>
+    <h2 class="reveal d1">频域分析</h2>
+    <p class="reveal d2 en">Frequency Domain Analysis</p>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>模拟调制</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 14: Comparison
+     ========================================= -->
+<section class="slide" id="slide-14">
+  <div class="header-area">
+    <span class="chapter-label">比较</span>
+    <span class="slide-num">14 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">调制方式综合比较</h2>
+    <table class="compare-table reveal d1">
+      <thead>
+        <tr>
+          <th>特性</th>
+          <th>AM</th>
+          <th>DSB-SC</th>
+          <th>SSB</th>
+          <th>FM</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>带宽</td>
+          <td>2f<sub>H</sub></td>
+          <td>2f<sub>H</sub></td>
+          <td>f<sub>H</sub></td>
+          <td>2(β+1)f<sub>m</sub></td>
+        </tr>
+        <tr>
+          <td>功率效率</td>
+          <td>≤ 33%</td>
+          <td>100%</td>
+          <td>100%</td>
+          <td>100%</td>
+        </tr>
+        <tr>
+          <td>解调方式</td>
+          <td>包络检波</td>
+          <td>相干解调</td>
+          <td>相干解调</td>
+          <td>鉴频器</td>
+        </tr>
+        <tr>
+          <td>抗噪性能</td>
+          <td>差</td>
+          <td>中等</td>
+          <td>中等</td>
+          <td>优（宽带FM）</td>
+        </tr>
+        <tr>
+          <td>典型应用</td>
+          <td>中波广播</td>
+          <td>立体声广播</td>
+          <td>短波通信</td>
+          <td>调频广播/电视伴音</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>频域分析</span>
+  </div>
+</section>
+
+<!-- =========================================
+     SLIDE 15: Summary
+     ========================================= -->
+<section class="slide" id="slide-15">
+  <div class="header-area">
+    <span class="chapter-label">总结</span>
+    <span class="slide-num">15 / 15</span>
+  </div>
+  <div class="slide-content">
+    <div class="side-line"></div>
+    <h2 class="reveal">本章小结</h2>
+    <div class="card-grid reveal d1" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));">
+      <div class="card">
+        <h3>幅度调制</h3>
+        <p>AM · DSB-SC · SSB · VSB<br>线性调制，改变载波幅度</p>
+      </div>
+      <div class="card">
+        <h3>角度调制</h3>
+        <p>FM · PM<br>非线性调制，恒包络，抗噪性能好</p>
+      </div>
+      <div class="card">
+        <h3>频域视角</h3>
+        <p>频谱搬移 · 带宽计算<br>卡逊规则 · 功率分配</p>
+      </div>
+    </div>
+    <p class="reveal d2" style="margin-top: var(--content-gap); font-size: var(--body-size); color: var(--text-secondary); text-align: center;">
+      理解调制原理是掌握通信系统设计的基石。
+    </p>
+  </div>
+  <div class="bottom-bar">
+    <span>通信原理</span>
+    <span>谢谢</span>
+  </div>
+</section>
+
+<!-- =========================================
+     JAVASCRIPT: Navigation & Animation
+     ========================================= -->
+<script>
+/* ===========================================
+SLIDE PRESENTATION CONTROLLER
+Handles keyboard, mouse, touch, scroll navigation
+and Intersection Observer for reveal animations
+=========================================== */
+class SlidePresentation {
+  constructor() {
+    this.slides = document.querySelectorAll('.slide');
+    this.currentSlide = 0;
+    this.totalSlides = this.slides.length;
+    this.isScrolling = false;
+
+    this.initProgress();
+    this.initNavDots();
+    this.initKeyboard();
+    this.initTouch();
+    this.initObserver();
+    this.updateProgress();
+  }
+
+  /* --- Progress bar --- */
+  initProgress() {
+    this.progressBar = document.getElementById('progressBar');
+  }
+
+  updateProgress() {
+    const pct = ((this.currentSlide + 1) / this.totalSlides) * 100;
+    this.progressBar.style.width = pct + '%';
+  }
+
+  /* --- Navigation dots --- */
+  initNavDots() {
+    const container = document.getElementById('navDots');
+    this.slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      dot.addEventListener('click', () => this.goToSlide(i));
+      container.appendChild(dot);
+    });
+    this.dots = container.querySelectorAll('.nav-dot');
+  }
+
+  updateDots() {
+    this.dots.forEach((d, i) => {
+      d.classList.toggle('active', i === this.currentSlide);
+    });
+  }
+
+  /* --- Keyboard navigation --- */
+  initKeyboard() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        this.nextSlide();
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        this.goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        this.goToSlide(this.totalSlides - 1);
+      }
+    });
+  }
+
+  /* --- Touch / swipe --- */
+  initTouch() {
+    let startY = 0;
+    let startX = 0;
+    document.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      const dy = startY - e.changedTouches[0].clientY;
+      const dx = startX - e.changedTouches[0].clientX;
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 50) {
+        dy > 0 ? this.nextSlide() : this.prevSlide();
+      }
+    }, { passive: true });
+  }
+
+  /* --- Intersection Observer for animations --- */
+  initObserver() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          // Update current slide tracking
+          const idx = Array.from(this.slides).indexOf(entry.target);
+          if (idx !== -1) {
+            this.currentSlide = idx;
+            this.updateProgress();
+            this.updateDots();
+          }
+        }
+      });
+    }, {
+      threshold: 0.5
+    });
+
+    this.slides.forEach(slide => observer.observe(slide));
+  }
+
+  /* --- Navigation methods --- */
+  goToSlide(index) {
+    if (index < 0 || index >= this.totalSlides) return;
+    this.slides[index].scrollIntoView({ behavior: 'smooth' });
+    this.currentSlide = index;
+    this.updateProgress();
+    this.updateDots();
+  }
+
+  nextSlide() {
+    this.goToSlide(this.currentSlide + 1);
+  }
+
+  prevSlide() {
+    this.goToSlide(this.currentSlide - 1);
+  }
+}
+
+/* Initialize when DOM is ready */
+document.addEventListener('DOMContentLoaded', () => {
+  new SlidePresentation();
+});
+</script>
+</body>
+</html>
