@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/shared/stores/appStore'
 import { useProjectStore } from '@/shared/stores/projectStore'
 import type { StylePreset } from '@/shared/types/project'
-import { getStyleConfig, stylePresets } from './stylePresets'
+import { getStyleConfig, stylePresets, getDesignTokens } from './stylePresets'
 import { SlideRenderer, useStyleFonts } from './SlideRenderer'
 
 const Area = styled.div`
@@ -204,15 +204,6 @@ export function PreviewArea() {
   const prevSlideRef = useRef(activeSlideIndex)
   const thumbStripRef = useRef<HTMLDivElement>(null)
   const activeThumbRef = useRef<HTMLDivElement>(null)
-  const slideDirection = activeSlideIndex >= prevSlideRef.current ? 1 : -1
-  useEffect(() => { prevSlideRef.current = activeSlideIndex }, [activeSlideIndex])
-
-  // Auto-scroll thumbnail strip to active slide
-  useEffect(() => {
-    if (activeThumbRef.current && thumbStripRef.current) {
-      activeThumbRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
-    }
-  }, [activeSlideIndex])
 
   const [fullscreen, setFullscreen] = useState(false)
   const [fsScale, setFsScale] = useState(1)
@@ -237,6 +228,8 @@ export function PreviewArea() {
   const styleConfig = getStyleConfig(style)
   useStyleFonts(style)
 
+  const tokens = getDesignTokens(style)
+
   const cssVars = {
     '--display-font': styleConfig.displayFont,
     '--body-font': styleConfig.bodyFont,
@@ -253,8 +246,17 @@ export function PreviewArea() {
     '--content-notes-color': styleConfig.contentNotesColor,
     '--dot-active': styleConfig.dotActive,
     '--dot-inactive': styleConfig.dotInactive,
-    '--card-bg': styleConfig.titleAccentBg + '15',
-    '--card-border': styleConfig.titleAccentBg + '30'
+    // Enhanced design token CSS vars
+    '--card-bg': tokens.colors.cardBg,
+    '--card-border': tokens.colors.border,
+    '--accent-line-bg': tokens.components.accentLine.background,
+    '--accent-line-width': tokens.components.accentLine.width,
+    '--tag-pill-bg': tokens.components.tagPill.background,
+    '--tag-pill-color': tokens.components.tagPill.color,
+    '--radii-card': tokens.radii.cardMd,
+    '--text-muted': tokens.colors.textMuted,
+    '--text-light': tokens.colors.textLight,
+    '--decorative-style': tokens.decorativeStyle,
   } as React.CSSProperties
 
   if (!project || project.slides.length === 0) {
@@ -274,8 +276,29 @@ export function PreviewArea() {
   }
 
   const slides = project.slides
-  const currentSlide = slides[activeSlideIndex] || slides[0]
+  const safeIndex = Math.min(activeSlideIndex, slides.length - 1)
+  const currentSlide = slides[safeIndex] || slides[0]
   const totalSlides = slides.length
+
+  // Clamp activeSlideIndex when slides are deleted
+  useEffect(() => {
+    if (activeSlideIndex >= slides.length && slides.length > 0) {
+      setActiveSlideIndex(slides.length - 1)
+    } else if (slides.length === 0) {
+      setActiveSlideIndex(0)
+    }
+  }, [slides.length, activeSlideIndex, setActiveSlideIndex])
+
+  const slideDirection = safeIndex >= prevSlideRef.current ? 1 : -1
+  useEffect(() => { prevSlideRef.current = safeIndex }, [safeIndex])
+
+  // Auto-scroll thumbnail strip to active slide
+  useEffect(() => {
+    if (activeThumbRef.current && thumbStripRef.current) {
+      activeThumbRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+    }
+  }, [safeIndex])
+
   const getSectionNumber = (sectionId: string) => {
     const section = project.documentOutline.sections.find((s) => s.id === sectionId)
     return section?.order
@@ -362,7 +385,7 @@ export function PreviewArea() {
             <span className="material-icons-round" style={{ fontSize: 16, color: '#6750A4' }}>visibility</span>
             {t('editor.preview')}
           </ToolbarTitle>
-          <SlideCounter>{activeSlideIndex + 1} / {totalSlides}</SlideCounter>
+          <SlideCounter>{safeIndex + 1} / {totalSlides}</SlideCounter>
         </ToolbarLeft>
         <Controls>
           <Select value={style} onChange={(e) => setSelectedStyle(e.target.value as StylePreset)}>
@@ -379,10 +402,10 @@ export function PreviewArea() {
 
       <SlideMain onWheel={handleWheel}>
         <SlideCanvas style={cssVars}>
-          <SlideTransition key={activeSlideIndex} direction={slideDirection}>
+          <SlideTransition key={safeIndex} direction={slideDirection}>
             <SlideRenderer
               slide={currentSlide}
-              slideIndex={activeSlideIndex}
+              slideIndex={safeIndex}
               totalSlides={totalSlides}
               sectionNumber={getSectionNumber(currentSlide.sectionId)}
             />
@@ -392,7 +415,7 @@ export function PreviewArea() {
 
       <ThumbStrip ref={thumbStripRef}>
         {slides.map((slide, i) => (
-          <ThumbItem key={slide.id} ref={(el) => { if (i === activeSlideIndex) activeThumbRef.current = el }} active={activeSlideIndex === i} onClick={() => handleThumbClick(i)}>
+          <ThumbItem key={slide.id} ref={(el) => { if (i === safeIndex) activeThumbRef.current = el }} active={safeIndex === i} onClick={() => handleThumbClick(i)}>
             <ThumbInner style={cssVars}>
               <SlideRenderer
                 slide={slide}
@@ -414,10 +437,10 @@ export function PreviewArea() {
         }}>
           <FullscreenWrapper style={{ width: 960 * fsScale, height: 540 * fsScale }} onClick={(e) => e.stopPropagation()}>
             <FullscreenCanvas style={{ ...cssVars, transform: `scale(${fsScale})` }}>
-              <SlideTransition key={activeSlideIndex} direction={slideDirection}>
+              <SlideTransition key={safeIndex} direction={slideDirection}>
                 <SlideRenderer
                   slide={currentSlide}
-                  slideIndex={activeSlideIndex}
+                  slideIndex={safeIndex}
                   totalSlides={totalSlides}
                   sectionNumber={getSectionNumber(currentSlide.sectionId)}
                 />
@@ -425,11 +448,11 @@ export function PreviewArea() {
             </FullscreenCanvas>
           </FullscreenWrapper>
           <FullscreenControls onClick={(e) => e.stopPropagation()}>
-            <FullscreenBtn onClick={() => syncOutlineFromSlide(activeSlideIndex - 1)} disabled={activeSlideIndex === 0}>
+            <FullscreenBtn onClick={() => syncOutlineFromSlide(safeIndex - 1)} disabled={safeIndex === 0}>
               <span className="material-icons-round" style={{ fontSize: 20 }}>chevron_left</span>
             </FullscreenBtn>
-            <FullscreenCounter>{activeSlideIndex + 1} / {totalSlides}</FullscreenCounter>
-            <FullscreenBtn onClick={() => syncOutlineFromSlide(activeSlideIndex + 1)} disabled={activeSlideIndex === totalSlides - 1}>
+            <FullscreenCounter>{safeIndex + 1} / {totalSlides}</FullscreenCounter>
+            <FullscreenBtn onClick={() => syncOutlineFromSlide(safeIndex + 1)} disabled={safeIndex === totalSlides - 1}>
               <span className="material-icons-round" style={{ fontSize: 20 }}>chevron_right</span>
             </FullscreenBtn>
             <FullscreenBtn onClick={() => setFullscreen(false)}>

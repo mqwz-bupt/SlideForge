@@ -322,7 +322,24 @@ export function OutlineStep({ onNext, onBack }: OutlineStepProps) {
           ]
 
       const result = await window.api!.ai.chat(config, messages, { temperature: 0.7, max_tokens: 4096 })
-      const data = parseAIJSON(result.content, 'Outline generation result')
+
+      let data: any
+      try {
+        data = parseAIJSON(result.content, 'Outline generation result')
+      } catch (parseErr: any) {
+        // Auto-retry once with a stricter prompt
+        console.warn('[OutlineStep] First parse failed, retrying with stricter prompt:', parseErr.message)
+        const retryMessages = [
+          {
+            role: 'system' as const,
+            content: '你只输出纯合法JSON。不要加任何markdown、注释、或非JSON字符。确保所有属性名和字符串值都用双引号包裹。属性之间用逗号分隔。'
+          },
+          { role: 'user' as const, content: `请重新输出以下JSON，确保格式完全合法：\n${result.content}` }
+        ]
+        const retryResult = await window.api!.ai.chat(config, retryMessages, { temperature: 0.3, max_tokens: 4096 })
+        data = parseAIJSON(retryResult.content, 'Outline generation result (retry)')
+      }
+
       setOutline(parseOutlineData(data))
     } catch (err: any) {
       setError(err.message || t('wizard.outlineGenError'))

@@ -25,6 +25,53 @@ describe('repairJSON', () => {
     const parsed = JSON.parse(result)
     expect(parsed[1]).toBe('world')
   })
+
+  it('fixes unquoted object keys', () => {
+    const input = '{title:"AI导论",sections:[{order:1,title:"概述"}]}'
+    const result = repairJSON(input)
+    const parsed = JSON.parse(result)
+    expect(parsed.title).toBe('AI导论')
+    expect(parsed.sections[0].order).toBe(1)
+    expect(parsed.sections[0].title).toBe('概述')
+  })
+
+  it('fixes mixed quoted/unquoted keys in nested objects', () => {
+    const input = '{"sections":[{"order":1,title:"技术"},{order:2,"title":"应用"}]}'
+    const result = repairJSON(input)
+    const parsed = JSON.parse(result)
+    expect(parsed.sections[0].title).toBe('技术')
+    expect(parsed.sections[1].title).toBe('应用')
+  })
+
+  it('replaces single-quoted strings with double quotes', () => {
+    const input = "{'title': 'Hello', 'body': ['a', 'b']}"
+    const result = repairJSON(input)
+    const parsed = JSON.parse(result)
+    expect(parsed.title).toBe('Hello')
+    expect(parsed.body).toEqual(['a', 'b'])
+  })
+
+  it('handles first unquoted element in array', () => {
+    const input = '[hello, "world"]'
+    const result = repairJSON(input)
+    const parsed = JSON.parse(result)
+    expect(parsed[0]).toBe('hello')
+    expect(parsed[1]).toBe('world')
+  })
+
+  it('preserves Chinese curly quotes inside ASCII-quoted string values', () => {
+    const input = '{"title":"\u201cAI\u201d\u91cd\u8981\u6027","body":["test"]}'
+    const result = repairJSON(input)
+    const parsed = JSON.parse(result)
+    expect(parsed.title).toBe('\u201cAI\u201d\u91cd\u8981\u6027')
+  })
+
+  it('handles Chinese quotes used as JSON delimiters', () => {
+    const input = '{\u201ctitle\u201d:\u201cHello World\u201d}'
+    const result = repairJSON(input)
+    const parsed = JSON.parse(result)
+    expect(parsed.title).toBe('Hello World')
+  })
 })
 
 describe('cleanText', () => {
@@ -101,6 +148,14 @@ describe('cleanSlideStrings', () => {
     expect(result.layout).toBe('content')
     expect(result.order).toBe(1)
   })
+
+  it('does not truncate body items containing math', () => {
+    const longFormula = '$$\\text{明暗法: } I_{\\text{表面}} = I_{\\text{光源}} \\cdot \\cos(\\theta)$$'
+    const slide = { body: [longFormula] }
+    const result = cleanSlideStrings(slide)
+    expect(result.body[0]).toBe(longFormula)
+    expect(result.body[0].length).toBeGreaterThan(40)
+  })
 })
 
 describe('extractJSON', () => {
@@ -131,5 +186,28 @@ describe('extractJSON', () => {
     const text = '```json\n{invalid {{{json\n```'
     const result = extractJSON(text)
     expect(typeof result).toBe('string')
+  })
+
+  it('fixes missing commas between properties', () => {
+    const text = '{"title":"AI" "sections":[]}'
+    const result = extractJSON(text)
+    const parsed = JSON.parse(result)
+    expect(parsed.title).toBe('AI')
+    expect(parsed.sections).toEqual([])
+  })
+
+  it('strips invisible characters', () => {
+    const text = '{"title":"AI\u200b导论"}'
+    const result = extractJSON(text)
+    const parsed = JSON.parse(result)
+    expect(parsed.title).toBe('AI导论')
+  })
+
+  it('handles realistic AI outline output', () => {
+    const text = '{"title":"人工智能导论","sections":[{"order":1,"title":"基本概念","points":["AI的定义","图灵测试"]},{"order":2,"title":"机器学习","points":["监督学习","无监督学习"]}],"estimatedMinutes":15}'
+    const result = extractJSON(text)
+    const parsed = JSON.parse(result)
+    expect(parsed.sections.length).toBe(2)
+    expect(parsed.sections[0].points.length).toBe(2)
   })
 })

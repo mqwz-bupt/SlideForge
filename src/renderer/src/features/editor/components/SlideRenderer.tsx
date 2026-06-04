@@ -3,23 +3,32 @@ import styled from '@emotion/styled'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import type { StylePreset } from '@/shared/types/project'
-import { getStyleConfig } from './stylePresets'
+import { getStyleConfig, getDesignTokens } from './stylePresets'
 
-/** Render text with inline math ($...$) and block math ($$...$$) via KaTeX */
+/** Render text with inline/block math via KaTeX.
+ *  Supports: $...$, $$...$$, \(...\), \[...\] */
 function renderMath(text: string): string {
   if (!text) return text
-  // Block math $$...$$ first
-  let result = text.replace(/\$\$([\s\S]*?)\$\$/g, (_, tex) => {
+
+  const normalizeTex = (tex: string) => tex.replace(/\\\\/g, '\\')
+
+  const render = (tex: string, display: boolean) => {
     try {
-      return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false })
+      return katex.renderToString(normalizeTex(tex.trim()), { displayMode: display, throwOnError: false })
     } catch { return tex }
-  })
-  // Inline math $...$
-  result = result.replace(/\$([^$\n]+?)\$/g, (_, tex) => {
-    try {
-      return katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false })
-    } catch { return tex }
-  })
+  }
+
+  // Strip surrounding backticks the AI sometimes wraps around formulas: `$...$` → $...$
+  let result = text.replace(/`(\$[^`]+\$)`/g, '$1')
+
+  // Block math: $$...$$ or \[...\]
+  result = result.replace(/\$\$([\s\S]*?)\$\$/g, (_, tex) => render(tex, true))
+  result = result.replace(/\\\[([\s\S]*?)\\\]/g, (_, tex) => render(tex, true))
+
+  // Inline math: \(...\) then $...$
+  result = result.replace(/\\\(([\s\S]*?)\\\)/g, (_, tex) => render(tex, false))
+  result = result.replace(/\$([^$\n]+?)\$/g, (_, tex) => render(tex, false))
+
   return result
 }
 
@@ -42,6 +51,11 @@ export function useStyleFonts(preset: StylePreset) {
     document.head.appendChild(link)
   }, [preset, config.fontsUrl])
 }
+
+/* ========== DECORATIVE OVERLAY ========== */
+const CoverDecor = styled.div`
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+`
 
 /* ========== TITLE SLIDE ========== */
 const TitleSlideRoot = styled.div`
@@ -135,6 +149,16 @@ export const ContentHeader = styled.div`
   margin-bottom: clamp(8px, 1.5vh, 16px);
   padding-bottom: clamp(6px, 1vh, 12px);
   border-bottom: clamp(1px, 0.15vh, 2px) solid var(--content-header-border);
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0;
+    width: var(--accent-line-width, 60px);
+    height: clamp(2px, 0.25vh, 3px);
+    background: var(--accent-line-bg, var(--content-header-border));
+    border-radius: 2px;
+  }
 `
 
 export const ContentTitle = styled.h2`
@@ -264,8 +288,8 @@ const HighlightBody = styled.ul`
 const HighlightPill = styled.li`
   font-family: var(--body-font);
   font-size: clamp(13px, 1.45vw, 18px);
-  color: var(--content-bullet-color);
-  background: var(--card-bg, rgba(0,0,0,0.03));
+  color: var(--tag-pill-color, var(--content-bullet-color));
+  background: var(--tag-pill-bg, rgba(0,0,0,0.03));
   border: 1px solid var(--card-border, rgba(0,0,0,0.06));
   padding: clamp(3px, 0.4vh, 6px) clamp(8px, 1vw, 14px);
   border-radius: 20px;
@@ -327,9 +351,10 @@ const FeatureGridContainer = styled.div`
 `
 
 const FeatureCard = styled.div`
-  background: rgba(128,128,128,0.04); border-radius: 12px;
+  background: var(--card-bg, rgba(128,128,128,0.04));
+  border-radius: var(--radii-card, 12px);
   padding: clamp(10px, 1.5vw, 20px); text-align: center;
-  border: 1px solid rgba(128,128,128,0.08);
+  border: 1px solid var(--card-border, rgba(128,128,128,0.08));
 `
 
 const FeatureCardNumber = styled.span`
@@ -406,9 +431,9 @@ const BigNumberPills = styled.div`
 const BigNumberPill = styled.div`
   padding: 6px 16px; border-radius: 20px;
   font-size: clamp(13px, 1.45vw, 18px); font-family: var(--body-font);
-  color: var(--content-bullet-color);
-  background: rgba(128,128,128,0.06);
-  border: 1px solid rgba(128,128,128,0.1);
+  color: var(--tag-pill-color, var(--content-bullet-color));
+  background: var(--tag-pill-bg, rgba(128,128,128,0.06));
+  border: 1px solid var(--card-border, rgba(128,128,128,0.1));
 `
 
 /* ========== TIMELINE ========== */
@@ -541,6 +566,25 @@ const SlideNotes = styled.div`
   font-family: var(--body-font);
 `
 
+/* ========== DECORATIVE ELEMENT HELPER ========== */
+function CoverDecoration({ style }: { style: string }) {
+  const bg = `var(--title-accent-bg)`
+  const map: Record<string, React.CSSProperties> = {
+    'tinted-cards': { background: `var(--title-accent-bg)`, opacity: 0.04, clipPath: 'polygon(55% 0, 100% 0, 100% 100%, 35% 100%)' },
+    'color-split': { background: `var(--title-accent-bg)`, opacity: 0.08, clipPath: 'polygon(60% 0, 100% 0, 100% 100%, 40% 100%)' },
+    'type-as-mass': { background: `var(--title-accent-bg)`, opacity: 0.06, clipPath: 'polygon(0 0, 40% 0, 30% 100%, 0% 100%)' },
+    'hairline-rules': { borderTop: '2px solid var(--title-accent-bg)', opacity: 0.25, top: 0, height: 'auto', bottom: 'auto' },
+    'dot-grid': { backgroundImage: `radial-gradient(circle, var(--title-accent-bg) 1px, transparent 1px)`, backgroundSize: '24px 24px', opacity: 0.08 },
+    'oversized-numeral': { background: `var(--title-accent-bg)`, opacity: 0.04, borderRadius: '50%', width: '60%', height: '80%', right: '-10%', top: '10%' },
+    'neon-glow': { boxShadow: `inset 0 0 120px 40px var(--title-accent-bg)`, opacity: 0.04 },
+    'terminal-scan': { backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,0,0.015) 2px, rgba(0,255,0,0.015) 4px)', opacity: 1 },
+    'diagonal-hatch': { backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, var(--title-accent-bg) 10px, var(--title-accent-bg) 11px)`, opacity: 0.04 },
+  }
+  const css = map[style]
+  if (!css) return null
+  return <CoverDecor style={css} />
+}
+
 /* ========== SLIDE RENDERER ========== */
 export function SlideRenderer({
   slide,
@@ -555,10 +599,12 @@ export function SlideRenderer({
 }) {
   const layout = slide.layout || 'content'
   const content = slide.content
+  const decorativeStyle = (typeof window !== 'undefined' && getComputedStyle(document.documentElement).getPropertyValue('--decorative-style').trim()) || 'none'
 
   if (layout === 'title') {
     return (
       <TitleSlideRoot>
+        <CoverDecoration style={decorativeStyle} />
         <TitleAccent>{String(slide.order || slideIndex + 1).padStart(2, '0')}</TitleAccent>
         <TitleText>{content.title}</TitleText>
         {content.subtitle && <SubtitleText>{content.subtitle}</SubtitleText>}
@@ -572,6 +618,7 @@ export function SlideRenderer({
   if (layout === 'section-divider') {
     return (
       <DividerRoot>
+        <CoverDecoration style={decorativeStyle} />
         <DividerNumber>{sectionNumber ?? (slide.order || slideIndex + 1)}</DividerNumber>
         <DividerLine />
         <DividerTitle>{content.title}</DividerTitle>

@@ -230,10 +230,25 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   deletePoint: (sectionId, pointId) =>
     set((s) => {
       if (!s.currentProject) return s
+      const section = s.currentProject.documentOutline.sections.find((sec) => sec.id === sectionId)
+      if (!section) return s
+
+      const pointIndex = section.points.findIndex((p) => p.id === pointId)
       const newSections = mapSections(s.currentProject.documentOutline.sections, sectionId, (sec) => ({
         ...sec,
         points: sec.points.filter((p) => p.id !== pointId)
       }))
+
+      // Remove the corresponding content slide for this point
+      const contentSlides = s.currentProject.slides
+        .filter((sl) => sl.sectionId === sectionId && sl.layout !== 'section-divider' && sl.layout !== 'title')
+      let slides = s.currentProject.slides
+      if (pointIndex >= 0 && pointIndex < contentSlides.length) {
+        const slideToRemove = contentSlides[pointIndex]
+        slides = slides.filter((sl) => sl.id !== slideToRemove.id)
+      }
+      slides = slides.map((sl, i) => ({ ...sl, order: i + 1 }))
+
       return {
         currentProject: {
           ...s.currentProject,
@@ -241,7 +256,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
             ...s.currentProject.documentOutline,
             sections: newSections,
             totalPoints: Math.max(0, s.currentProject.documentOutline.totalPoints - 1)
-          }
+          },
+          slides
         }
       }
     }),
