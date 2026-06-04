@@ -101,10 +101,42 @@ const PRESENTATION_CSS = `
   opacity: 0;
   transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+.reveal-blur {
+  opacity: 0;
+  filter: blur(10px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.reveal-glow {
+  opacity: 0;
+  filter: blur(4px);
+  transform: scale(1.02);
+  transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 .slide.visible .reveal { opacity: 1; transform: translateY(0); }
 .slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
 .slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
 .slide.visible .reveal-fade { opacity: 1; }
+.slide.visible .reveal-blur { opacity: 1; filter: blur(0); }
+.slide.visible .reveal-glow { opacity: 1; filter: blur(0); transform: scale(1); }
+.slide.visible .reveal-blur:nth-child(2) { transition-delay: 0.15s; }
+.slide.visible .reveal-blur:nth-child(3) { transition-delay: 0.3s; }
+.slide.visible .reveal-glow:nth-child(2) { transition-delay: 0.1s; }
+.slide.visible .reveal-glow:nth-child(3) { transition-delay: 0.2s; }
+
+/* ── Neon Glow Effect ── */
+@keyframes neon-pulse {
+  0%, 100% { box-shadow: 0 0 5px var(--title-accent-bg), 0 0 20px var(--title-accent-bg); }
+  50% { box-shadow: 0 0 10px var(--title-accent-bg), 0 0 40px var(--title-accent-bg), 0 0 60px var(--title-accent-bg); }
+}
+.neon-glow {
+  animation: neon-pulse 3s ease-in-out infinite;
+}
+.neon-text-glow {
+  text-shadow: 0 0 7px var(--title-accent-bg), 0 0 20px var(--title-accent-bg), 0 0 42px var(--title-accent-bg);
+}
 .slide.visible .reveal:nth-child(2) { transition-delay: 0.1s; }
 .slide.visible .reveal:nth-child(3) { transition-delay: 0.2s; }
 .slide.visible .reveal:nth-child(4) { transition-delay: 0.3s; }
@@ -139,6 +171,47 @@ const PRESENTATION_CSS = `
   animation: pulse 6s ease-in-out infinite;
 }
 @keyframes pulse { 0%,100% { opacity: 0.04; transform: scale(1); } 50% { opacity: 0.08; transform: scale(1.06); } }
+
+/* ── Layered Background Effects (from frontend-slides reference) ── */
+.noise-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; z-index: 0; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+.grid-pattern {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; z-index: 0; opacity: 0.4;
+  background-image:
+    linear-gradient(var(--grid-line-color, rgba(255,255,255,0.04)) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-color, rgba(255,255,255,0.04)) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.gradient-mesh {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, var(--mesh-color1, rgba(120,0,255,0.15)) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, var(--mesh-color2, rgba(0,255,200,0.1)) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, var(--mesh-color3, rgba(255,0,100,0.05)) 0%, transparent 60%);
+}
+.dots-pattern {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; z-index: 0; opacity: 0.3;
+  background-image: radial-gradient(var(--dot-pattern-color, rgba(255,255,255,0.08)) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.diagonal-lines {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; z-index: 0; opacity: 0.04;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    var(--diag-line-color, rgba(255,255,255,0.5)) 10px,
+    var(--diag-line-color, rgba(255,255,255,0.5)) 11px
+  );
+}
 
 /* ── Progress bar ── */
 .progress-container { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: rgba(128,128,128,0.1); z-index: 100; }
@@ -736,6 +809,13 @@ ${PRESENTATION_CSS}
   --dot-active: ${styleConfig.dotActive};
   --dot-inactive: ${styleConfig.dotInactive};
 }
+${styleConfig.bgEffect && styleConfig.bgEffect !== 'none' ? `.slide::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0; }` : ''}
+${styleConfig.bgEffect === 'noise-overlay' ? `.slide::before { opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 256px 256px; }` : ''}
+${styleConfig.bgEffect === 'grid-pattern' ? `.slide::before { opacity: 0.4; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 50px 50px; }` : ''}
+${styleConfig.bgEffect === 'gradient-mesh' ? `.slide::before { background: radial-gradient(ellipse at 20% 80%, rgba(120,0,255,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(0,255,200,0.1) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(255,0,100,0.05) 0%, transparent 60%); }` : ''}
+${styleConfig.bgEffect === 'dots-pattern' ? `.slide::before { opacity: 0.3; background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 20px 20px; }` : ''}
+${styleConfig.bgEffect === 'diagonal-lines' ? `.slide::before { opacity: 0.04; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.5) 10px, rgba(255,255,255,0.5) 11px); }` : ''}
+${styleConfig.themeCSS || ''}
   </style>
 </head>
 <body>

@@ -21,7 +21,7 @@ export interface ChatResult {
 }
 
 export interface AIProviderConfig {
-  provider: 'deepseek' | 'qwen' | 'glm' | 'openai'
+  provider: 'deepseek' | 'qwen' | 'glm' | 'openai' | 'wenxin'
   apiKey: string
   model: string
   baseURL: string
@@ -42,5 +42,10 @@ export const PROVIDER_PRESETS: Record<string, Omit<AIProviderConfig, 'apiKey'>> 
     provider: 'glm',
     model: 'glm-4-flash',
     baseURL: 'https://open.bigmodel.cn/api/paas/v4'
+  },
+  wenxin: {
+    provider: 'wenxin',
+    model: 'ernie-4.0-8k',
+    baseURL: 'https://qianfan.baidubce.com/v2'
   }
 }

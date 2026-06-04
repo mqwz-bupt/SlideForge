@@ -23,6 +23,10 @@ export interface StyleConfig {
   contentNotesColor: string
   dotActive: string
   dotInactive: string
+  /** Background effect class applied to slides for visual depth */
+  bgEffect?: 'noise-overlay' | 'grid-pattern' | 'gradient-mesh' | 'dots-pattern' | 'diagonal-lines' | 'none'
+  /** Theme-specific CSS overrides for unique visual identity */
+  themeCSS?: string
 }
 
 type StylePreset =
@@ -48,7 +52,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#FF5722',
     contentNotesColor: 'rgba(255,255,255,0.4)',
     dotActive: '#FF5722',
-    dotInactive: 'rgba(255,255,255,0.4)'
+    dotInactive: 'rgba(255,255,255,0.4)',
+    bgEffect: 'noise-overlay',
+    themeCSS: `
+.bold-signal-accent { display: inline-block; padding: 12px 32px; background: var(--title-accent-bg); color: var(--title-accent-color); font-size: var(--h3-size); font-weight: 800; border-radius: 4px; transform: rotate(-1deg); }
+.title-slide .section-number-display { font-family: var(--display-font); font-size: clamp(5rem, 15vw, 12rem); font-weight: 900; color: var(--title-accent-bg); opacity: 0.15; position: absolute; top: -2%; left: -2%; line-height: 1; pointer-events: none; z-index: 1; }
+`
   },
   'electric-studio': {
     label: 'Electric Studio',
@@ -67,7 +76,13 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#4361ee',
     contentNotesColor: 'rgba(10,10,10,0.35)',
     dotActive: '#4361ee',
-    dotInactive: 'rgba(10,10,10,0.35)'
+    dotInactive: 'rgba(10,10,10,0.35)',
+    bgEffect: 'diagonal-lines',
+    themeCSS: `
+.electric-split { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
+.electric-split-left { background: #ffffff; display: flex; flex-direction: column; justify-content: center; padding: var(--slide-padding); }
+.electric-split-right { background: var(--title-accent-bg); color: #ffffff; display: flex; flex-direction: column; justify-content: center; padding: var(--slide-padding); }
+`
   },
   'creative-voltage': {
     label: 'Creative Voltage',
@@ -86,7 +101,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#d4ff00',
     contentNotesColor: 'rgba(255,255,255,0.4)',
     dotActive: '#d4ff00',
-    dotInactive: 'rgba(255,255,255,0.4)'
+    dotInactive: 'rgba(255,255,255,0.4)',
+    bgEffect: 'dots-pattern',
+    themeCSS: `
+.halftone-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0; background: radial-gradient(circle, var(--title-accent-bg) 1px, transparent 1.5px); background-size: 8px 8px; opacity: 0.08; }
+.neon-badge { display: inline-block; padding: 6px 20px; border: 2px solid var(--title-accent-bg); color: var(--title-accent-bg); font-size: var(--small-size); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; background: transparent; }
+`
   },
   'dark-botanical': {
     label: 'Dark Botanical',
@@ -105,7 +125,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#d4a574',
     contentNotesColor: 'rgba(232,228,223,0.35)',
     dotActive: '#d4a574',
-    dotInactive: 'rgba(232,228,223,0.35)'
+    dotInactive: 'rgba(232,228,223,0.35)',
+    bgEffect: 'noise-overlay',
+    themeCSS: `
+.botanical-frame { position: absolute; top: 12px; right: 12px; bottom: 12px; left: 12px; border: 1px solid var(--title-accent-bg); opacity: 0.15; pointer-events: none; border-radius: 2px; }
+.botanical-ornament { font-family: var(--display-font); font-size: var(--h2-size); color: var(--title-accent-bg); opacity: 0.3; position: absolute; bottom: var(--slide-padding); right: var(--slide-padding); pointer-events: none; }
+`
   },
   'notebook-tabs': {
     label: 'Notebook Tabs',
@@ -124,7 +149,11 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#2d2d2d',
     contentNotesColor: 'rgba(26,26,26,0.3)',
     dotActive: '#98d4bb',
-    dotInactive: 'rgba(26,26,26,0.3)'
+    dotInactive: 'rgba(26,26,26,0.3)',
+    bgEffect: 'none',
+    themeCSS: `
+.tab-marker { position: absolute; top: 0; right: 20%; width: 80px; height: 32px; background: var(--title-accent-bg); color: var(--title-accent-color); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 0 0 8px 8px; letter-spacing: 1px; text-transform: uppercase; }
+`
   },
   'pastel-geometry': {
     label: 'Pastel Geometry',
@@ -143,7 +172,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#9b8dc4',
     contentNotesColor: 'rgba(26,26,26,0.3)',
     dotActive: '#9b8dc4',
-    dotInactive: 'rgba(26,26,26,0.3)'
+    dotInactive: 'rgba(26,26,26,0.3)',
+    bgEffect: 'dots-pattern',
+    themeCSS: `
+.geo-shape { position: absolute; width: 120px; height: 120px; border: 3px solid var(--title-accent-bg); opacity: 0.1; pointer-events: none; border-radius: 50%; }
+.geo-shape-2 { position: absolute; width: 80px; height: 80px; background: var(--title-accent-bg); opacity: 0.05; pointer-events: none; transform: rotate(45deg); }
+`
   },
   'split-pastel': {
     label: 'Split Pastel',
@@ -162,7 +196,11 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#c8f0d8',
     contentNotesColor: 'rgba(26,26,26,0.3)',
     dotActive: '#c8f0d8',
-    dotInactive: 'rgba(26,26,26,0.3)'
+    dotInactive: 'rgba(26,26,26,0.3)',
+    bgEffect: 'none',
+    themeCSS: `
+.split-divider { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: linear-gradient(180deg, transparent, var(--title-accent-bg), transparent); opacity: 0.3; pointer-events: none; }
+`
   },
   'vintage-editorial': {
     label: 'Vintage Editorial',
@@ -181,7 +219,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#1a1a1a',
     contentNotesColor: 'rgba(26,26,26,0.3)',
     dotActive: '#1a1a1a',
-    dotInactive: 'rgba(26,26,26,0.3)'
+    dotInactive: 'rgba(26,26,26,0.3)',
+    bgEffect: 'noise-overlay',
+    themeCSS: `
+.editorial-dropcap { float: left; font-family: var(--display-font); font-size: clamp(3rem, 8vw, 6rem); line-height: 0.8; padding-right: 8px; color: var(--title-accent-bg); font-weight: 900; }
+.editorial-rule { width: 60px; height: 2px; background: var(--title-accent-bg); margin: 0 auto var(--content-gap); }
+`
   },
   'neon-cyber': {
     label: 'Neon Cyber',
@@ -200,7 +243,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#00ffcc',
     contentNotesColor: 'rgba(0,255,204,0.35)',
     dotActive: '#00ffcc',
-    dotInactive: 'rgba(0,255,204,0.35)'
+    dotInactive: 'rgba(0,255,204,0.35)',
+    bgEffect: 'grid-pattern',
+    themeCSS: `
+.cyber-scanline { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 1; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,204,0.015) 2px, rgba(0,255,204,0.015) 4px); }
+.highlight-box { box-shadow: 0 0 20px var(--title-accent-bg), 0 0 40px rgba(0,255,204,0.3); animation: neon-pulse 3s ease-in-out infinite; }
+`
   },
   'terminal-green': {
     label: 'Terminal Green',
@@ -219,7 +267,13 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#39d353',
     contentNotesColor: 'rgba(57,211,83,0.35)',
     dotActive: '#39d353',
-    dotInactive: 'rgba(57,211,83,0.35)'
+    dotInactive: 'rgba(57,211,83,0.35)',
+    bgEffect: 'grid-pattern',
+    themeCSS: `
+.terminal-cursor { display: inline-block; width: 10px; height: 1.2em; background: var(--title-accent-bg); margin-left: 4px; vertical-align: text-bottom; animation: blink-cursor 1s step-end infinite; }
+@keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.terminal-prompt::before { content: '> '; color: var(--title-accent-bg); font-weight: 700; }
+`
   },
   'swiss-modern': {
     label: 'Swiss Modern',
@@ -238,7 +292,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#ff3300',
     contentNotesColor: 'rgba(0,0,0,0.3)',
     dotActive: '#ff3300',
-    dotInactive: 'rgba(0,0,0,0.3)'
+    dotInactive: 'rgba(0,0,0,0.3)',
+    bgEffect: 'none',
+    themeCSS: `
+.swiss-line { position: absolute; top: var(--slide-padding); left: var(--slide-padding); right: var(--slide-padding); height: 3px; background: var(--title-accent-bg); }
+.swiss-block { display: inline-block; background: var(--title-accent-bg); color: var(--title-accent-color); padding: 4px 16px; font-weight: 800; font-size: var(--small-size); letter-spacing: 1px; text-transform: uppercase; }
+`
   },
   'paper-ink': {
     label: 'Paper & Ink',
@@ -257,7 +316,12 @@ const presets: Record<string, StyleConfig> = {
     contentBulletDot: '#c41e3a',
     contentNotesColor: 'rgba(26,26,26,0.3)',
     dotActive: '#c41e3a',
-    dotInactive: 'rgba(26,26,26,0.3)'
+    dotInactive: 'rgba(26,26,26,0.3)',
+    bgEffect: 'noise-overlay',
+    themeCSS: `
+.ink-splash { position: absolute; bottom: -20px; left: -20px; width: 100px; height: 100px; border-radius: 50%; background: var(--title-accent-bg); opacity: 0.04; filter: blur(20px); pointer-events: none; }
+.ink-underline { display: inline; background-image: linear-gradient(transparent 60%, var(--title-accent-bg) 60%); padding: 0 4px; }
+`
   }
 }
 

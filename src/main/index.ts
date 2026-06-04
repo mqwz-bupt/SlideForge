@@ -8,6 +8,24 @@ import { generatePPTX } from './export/pptx'
 import { generatePDF } from './export/pdf'
 import { initDatabase, saveProject, loadProject, listProjects, deleteProject } from './storage/database'
 
+/** Lazy-loaded PDF text extraction */
+async function parsePDF(buf: Buffer): Promise<string> {
+  const pdfParse = (await import('pdf-parse')).default
+  const data = await pdfParse(buf)
+  return data.text
+}
+
+/** Lazy-loaded DOCX text extraction */
+async function parseDOCX(buf: Buffer): Promise<string> {
+  const mammoth = await import('mammoth')
+  const result = await mammoth.extractRawText({ buffer: buf })
+  return result.value
+}
+
+function getExt(filePath: string): string {
+  return filePath.split('.').pop()?.toLowerCase() || ''
+}
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1400,
@@ -44,19 +62,34 @@ app.whenReady().then(() => {
   initDatabase()
   registerAIIPC()
 
-  // File IPC: open file dialog and read text content
+  // File IPC: open file dialog and read text content (supports txt, md, pdf, docx)
   ipcMain.handle('file:open-text', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openFile'],
       filters: [
-        { name: 'Text Documents', extensions: ['txt', 'md'] },
+        { name: 'Documents', extensions: ['txt', 'md', 'pdf', 'docx'] },
+        { name: 'Text Files', extensions: ['txt', 'md'] },
+        { name: 'PDF', extensions: ['pdf'] },
+        { name: 'Word', extensions: ['docx'] },
         { name: 'All Files', extensions: ['*'] }
       ]
     })
     if (result.canceled || result.filePaths.length === 0) return null
     const filePath = result.filePaths[0]
-    const content = await readFile(filePath, 'utf-8')
     const name = filePath.split(/[/\\]/).pop() || 'unknown'
+    const ext = getExt(filePath)
+
+    let content: string
+    if (ext === 'pdf') {
+      const buf = await readFile(filePath)
+      content = await parsePDF(buf)
+    } else if (ext === 'docx') {
+      const buf = await readFile(filePath)
+      content = await parseDOCX(buf)
+    } else {
+      content = await readFile(filePath, 'utf-8')
+    }
+
     return { name, content, path: filePath }
   })
 
