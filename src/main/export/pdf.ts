@@ -33,13 +33,24 @@ export async function generatePDF(project: ProjectData): Promise<Buffer> {
         }
         .slide:last-child { page-break-after: auto; }
         .progress-container, .nav-dots, .keyboard-hint { display: none !important; }
-        .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+        .reveal, .reveal-left, .reveal-scale, .reveal-fade, .reveal-blur, .reveal-glow {
+          opacity: 1 !important; transform: none !important; filter: none !important;
+          transition: none !important;
+        }
         .slide-bg-number, .slide-corner-accent, .slide-accent-bar { display: block; }
       `
     })
 
     // Use screen media type so CSS custom properties and backgrounds render
     await page.emulateMedia({ media: 'screen' })
+
+    // Force all slides to visible state so JS-dependent elements render
+    await page.evaluate(() => {
+      document.querySelectorAll('.slide').forEach(s => s.classList.add('visible'))
+    })
+
+    // Wait for fonts and images to finish loading
+    await page.waitForTimeout(500)
 
     const pdfBuffer = await page.pdf({
       // Use custom dimensions matching the viewport so each slide fills exactly one page
