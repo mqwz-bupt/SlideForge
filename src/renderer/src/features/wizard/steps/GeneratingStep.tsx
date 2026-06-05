@@ -531,8 +531,6 @@ ${sectionIdList}
       const batch1Data = parseAIJSON(batch1Result.content, 'Slide structure result')
       const structureSlides: any[] = (batch1Data.slides || []).map(cleanSlideStrings)
 
-      console.log(`[Batch1] Title + dividers: ${structureSlides.length} slides`)
-
       // === Batch 2: One slide per point ===
       const totalPoints = sections.reduce((sum, s) => sum + s.points.length, 0)
       const pointList = sections.map(s =>
@@ -686,7 +684,6 @@ ${sectionPointList}`
         }
       }
 
-      console.log(`[Batch2] Content slides: ${contentSlides.length} slides (expected ${totalPoints})`)
 
       // === Merge: assign content slides to sections by counting points ===
       let allRawSlides: any[] = []
@@ -722,7 +719,6 @@ ${sectionPointList}`
         }
       }
 
-      console.log(`[Merge] Total slides: ${allRawSlides.length}`)
       allRawSlides = removeGeneratedImages(allRawSlides)
 
       setCompletedSteps([0])
