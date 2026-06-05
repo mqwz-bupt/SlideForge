@@ -33,6 +33,7 @@ type StylePreset =
   | 'bold-signal' | 'electric-studio' | 'creative-voltage' | 'dark-botanical'
   | 'notebook-tabs' | 'pastel-geometry' | 'split-pastel' | 'vintage-editorial'
   | 'neon-cyber' | 'terminal-green' | 'swiss-modern' | 'paper-ink'
+  | 'chinese-ink' | 'cinematic' | 'neo-brutalist' | 'aurora'
 
 const presets: Record<string, StyleConfig> = {
   'bold-signal': {
@@ -321,6 +322,109 @@ const presets: Record<string, StyleConfig> = {
     themeCSS: `
 .ink-splash { position: absolute; bottom: -20px; left: -20px; width: 100px; height: 100px; border-radius: 50%; background: var(--title-accent-bg); opacity: 0.04; filter: blur(20px); pointer-events: none; }
 .ink-underline { display: inline; background-image: linear-gradient(transparent 60%, var(--title-accent-bg) 60%); padding: 0 4px; }
+`
+  },
+  'chinese-ink': {
+    label: 'Chinese Ink',
+    displayFont: "'Noto Serif SC', serif",
+    bodyFont: "'Noto Sans SC', sans-serif",
+    fontsUrl: 'https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap',
+    titleBg: '#f7f3e9',
+    titleColor: '#2c2c2c',
+    titleAccentBg: '#c23a2b',
+    titleAccentColor: '#f7f3e9',
+    titleSubtitleColor: 'rgba(44,44,44,0.5)',
+    contentBg: '#f7f3e9',
+    contentHeaderBorder: '#c23a2b',
+    contentTitleColor: '#2c2c2c',
+    contentBulletColor: 'rgba(44,44,44,0.6)',
+    contentBulletDot: '#c23a2b',
+    contentNotesColor: 'rgba(44,44,44,0.35)',
+    dotActive: '#c23a2b',
+    dotInactive: 'rgba(44,44,44,0.25)',
+    bgEffect: 'noise-overlay',
+    themeCSS: `
+.ink-seal { position: absolute; bottom: var(--slide-padding); right: var(--slide-padding); width: 48px; height: 48px; border: 2px solid var(--title-accent-bg); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--title-accent-bg); font-weight: 700; transform: rotate(8deg); opacity: 0.2; pointer-events: none; }
+.ink-wash { position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: var(--title-accent-bg); opacity: 0.03; filter: blur(40px); pointer-events: none; }
+.ink-brush-line { height: 1px; background: linear-gradient(90deg, var(--title-accent-bg), transparent); opacity: 0.4; margin: 1rem 0; }
+`
+  },
+  'cinematic': {
+    label: 'Cinematic',
+    displayFont: "'Playfair Display', 'Noto Serif SC', serif",
+    bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
+    fontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap',
+    titleBg: '#0a0a0a',
+    titleColor: '#f5f0e8',
+    titleAccentBg: '#d4a843',
+    titleAccentColor: '#0a0a0a',
+    titleSubtitleColor: 'rgba(245,240,232,0.55)',
+    contentBg: '#0a0a0a',
+    contentHeaderBorder: '#d4a843',
+    contentTitleColor: '#f5f0e8',
+    contentBulletColor: 'rgba(245,240,232,0.6)',
+    contentBulletDot: '#d4a843',
+    contentNotesColor: 'rgba(245,240,232,0.35)',
+    dotActive: '#d4a843',
+    dotInactive: 'rgba(245,240,232,0.3)',
+    bgEffect: 'noise-overlay',
+    themeCSS: `
+.cine-bar-top, .cine-bar-bottom { position: absolute; left: 0; right: 0; height: 4vh; background: #000; z-index: 2; pointer-events: none; }
+.cine-bar-top { top: 0; } .cine-bar-bottom { bottom: 0; }
+.cine-frame { position: absolute; top: 5vh; left: 3vw; right: 3vw; bottom: 5vh; border: 1px solid var(--title-accent-bg); opacity: 0.15; pointer-events: none; }
+.cine-rating { position: absolute; top: calc(5vh + 8px); right: calc(3vw + 8px); font-size: 10px; color: var(--title-accent-bg); opacity: 0.4; letter-spacing: 2px; text-transform: uppercase; pointer-events: none; }
+`
+  },
+  'neo-brutalist': {
+    label: 'Neo Brutalist',
+    displayFont: "'Space Grotesk', 'Noto Sans SC', sans-serif",
+    bodyFont: "'Space Mono', 'Noto Sans SC', monospace",
+    fontsUrl: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap',
+    titleBg: '#f0f0ec',
+    titleColor: '#1a1a1a',
+    titleAccentBg: '#ff2d6f',
+    titleAccentColor: '#ffffff',
+    titleSubtitleColor: 'rgba(26,26,26,0.6)',
+    contentBg: '#f0f0ec',
+    contentHeaderBorder: '#1a1a1a',
+    contentTitleColor: '#1a1a1a',
+    contentBulletColor: 'rgba(26,26,26,0.7)',
+    contentBulletDot: '#ff2d6f',
+    contentNotesColor: 'rgba(26,26,26,0.4)',
+    dotActive: '#ff2d6f',
+    dotInactive: 'rgba(26,26,26,0.3)',
+    bgEffect: 'none',
+    themeCSS: `
+.brutal-card { border: 3px solid var(--title-accent-bg); box-shadow: 6px 6px 0 var(--title-accent-bg); padding: 1.5rem; background: var(--title-bg); }
+.brutal-sticker { display: inline-block; background: #ffe135; color: #1a1a1a; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; padding: 4px 12px; transform: rotate(-3deg); }
+.brutal-divider { height: 3px; background: #1a1a1a; margin: 1.5rem 0; }
+`
+  },
+  'aurora': {
+    label: 'Aurora',
+    displayFont: "'Outfit', 'Noto Sans SC', sans-serif",
+    bodyFont: "'DM Sans', 'Noto Sans SC', sans-serif",
+    fontsUrl: 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap',
+    titleBg: '#0c1445',
+    titleColor: '#e0f7ef',
+    titleAccentBg: '#00e5a0',
+    titleAccentColor: '#0c1445',
+    titleSubtitleColor: 'rgba(224,247,239,0.55)',
+    contentBg: '#0c1445',
+    contentHeaderBorder: '#00e5a0',
+    contentTitleColor: '#e0f7ef',
+    contentBulletColor: 'rgba(224,247,239,0.6)',
+    contentBulletDot: '#00e5a0',
+    contentNotesColor: 'rgba(224,247,239,0.35)',
+    dotActive: '#00e5a0',
+    dotInactive: 'rgba(224,247,239,0.3)',
+    bgEffect: 'gradient-mesh',
+    themeCSS: `
+.aurora-glow { text-shadow: 0 0 30px rgba(0,229,160,0.4), 0 0 60px rgba(139,92,246,0.2); }
+.aurora-orb { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; opacity: 0.15; }
+.aurora-orb-1 { top: 10%; left: 60%; width: 300px; height: 300px; background: #00e5a0; }
+.aurora-orb-2 { top: 50%; left: 20%; width: 250px; height: 250px; background: #8b5cf6; }
+.aurora-orb-3 { top: 30%; left: 40%; width: 200px; height: 200px; background: #f472b6; }
 `
   }
 }

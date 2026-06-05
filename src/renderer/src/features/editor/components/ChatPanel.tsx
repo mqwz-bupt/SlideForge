@@ -167,8 +167,27 @@ function parseSlideUpdates(text: string): Array<{ index: number; content: Partia
           }
         }
       }
-    } catch { /* ignore parse errors */ }
+    } catch (e) { console.warn('[ChatPanel] slide-updates parse error:', e) }
   }
+
+  // Fallback: try ```json blocks that look like slide updates
+  if (updates.length === 0) {
+    const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/g
+    while ((match = jsonRegex.exec(text)) !== null) {
+      try {
+        const parsed = JSON.parse(match[1].trim())
+        const items = Array.isArray(parsed) ? parsed : parsed.updates ?? parsed.slides
+        if (Array.isArray(items)) {
+          for (const item of items) {
+            if (typeof item.index === 'number' && item.content) {
+              updates.push({ index: item.index, content: item.content, layout: item.layout })
+            }
+          }
+        }
+      } catch { /* not JSON, skip */ }
+    }
+  }
+
   return updates
 }
 
@@ -326,9 +345,11 @@ ${JSON.stringify(slidesContext, null, 0)}
         // Parse and apply slide updates
         const updates = parseSlideUpdates(fullContent)
         let appliedCount = 0
-        if (updates.length > 0 && currentProject) {
+        // Use getState() to get fresh project reference (avoid stale closure)
+        const freshProject = useProjectStore.getState().currentProject
+        if (updates.length > 0 && freshProject) {
           for (const upd of updates) {
-            if (upd.index >= 0 && upd.index < currentProject.slides.length) {
+            if (upd.index >= 0 && upd.index < freshProject.slides.length) {
               // Strip markdown from all string fields
               const clean: Record<string, any> = {}
               for (const [k, v] of Object.entries(upd.content)) {
@@ -350,7 +371,7 @@ ${JSON.stringify(slidesContext, null, 0)}
                   clean[k] = v
                 }
               }
-              updateSlideContent(upd.index, clean as Partial<SlideContent>)
+              updateSlideContent(upd.index, clean as Partial<SlideContent>, upd.layout as any)
               appliedCount++
             }
           }

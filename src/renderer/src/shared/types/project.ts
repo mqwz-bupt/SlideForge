@@ -73,6 +73,10 @@ export type StylePreset =
   | 'terminal-green'
   | 'swiss-modern'
   | 'paper-ink'
+  | 'chinese-ink'
+  | 'cinematic'
+  | 'neo-brutalist'
+  | 'aurora'
 
 export interface SourceFile {
   id: string

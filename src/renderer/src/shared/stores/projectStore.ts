@@ -34,6 +34,7 @@ interface ProjectState {
   currentProject: Project | null
   recentProjects: RecentProject[]
   chatMessages: ChatMessage[]
+  slideVersion: number
   selectedStyle: StylePreset | null
   topic: string
   selectedMood: string | null
@@ -93,6 +94,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   currentProject: null,
   recentProjects: mockRecentProjects,
   chatMessages: [],
+  slideVersion: 0,
   selectedStyle: null,
   topic: '',
   selectedMood: null,
@@ -337,20 +339,22 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         currentProject: {
           ...s.currentProject,
           slides: reordered
-        }
+        },
+        slideVersion: s.slideVersion + 1
       }
     }),
 
-  updateSlideContent: (slideIndex, content) =>
+  updateSlideContent: (slideIndex, content, layout?) =>
     set((s) => {
       if (!s.currentProject) return s
       const slides = [...s.currentProject.slides]
       if (slideIndex < 0 || slideIndex >= slides.length) return s
       slides[slideIndex] = {
         ...slides[slideIndex],
+        ...(layout ? { layout } : {}),
         content: { ...slides[slideIndex].content, ...content }
       }
-      return { currentProject: { ...s.currentProject, slides } }
+      return { currentProject: { ...s.currentProject, slides }, slideVersion: s.slideVersion + 1 }
     }),
 
   // === Persistence ===

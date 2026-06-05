@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SlideForge - 期末答辩汇报</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth}
+html,body{height:100%;overflow-x:hidden}
+
+:root{
+  --bg:#FAFAF8;--bg2:#F0EEE9;--bg3:#E4E1DB;
+  --text:#1A1A2E;--text2:#3D3D4A;--text3:#7A7A88;
+  --accent:#8B6914;--accent-bg:rgba(139,105,20,0.08);
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
+  --blue:#2E5090;--blue-bg:rgba(46,80,144,0.07);
+  --teal:#1A7A5C;--teal-bg:rgba(26,122,92,0.07);
+  --coral:#B84233;--coral-bg:rgba(184,66,51,0.07);
+  --purple:#6B4C9A;--purple-bg:rgba(107,76,154,0.07);
+  --df:'Noto Serif SC','Georgia',serif;
+  --bf:'Noto Sans SC','Helvetica Neue',sans-serif;
+  --mf:'Space Grotesk','Menlo',monospace;
+  --pad:clamp(28px,4vw,56px);
+}
+body{font-family:var(--bf);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:clamp(28px,3.6vw,36px);line-height:1.55}
+
+.slide{width:100vw;height:100vh;height:100dvh;overflow:hidden;scroll-snap-align:start;display:flex;flex-direction:column;position:relative}
+.sc{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;padding:var(--pad)}
+
+.topbar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);opacity:.35}
+.pg{position:absolute;bottom:clamp(14px,2vh,24px);right:clamp(16px,2.5vw,40px);font-family:var(--mf);font-size:clamp(22px,2vw,28px);color:var(--text3)}
+.slabel{font-family:var(--mf);font-size:clamp(22px,2.2vw,28px);color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:clamp(6px,1vh,12px)}
+.sh{font-family:var(--df);font-size:clamp(44px,6.8vw,72px);font-weight:700;color:var(--text);margin-bottom:clamp(4px,.7vh,8px);line-height:1.2}
+.ssub{font-size:clamp(24px,2.6vw,32px);color:var(--text3);margin-bottom:clamp(12px,2vh,22px);line-height:1.45}
+
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:clamp(14px,1.8vw,24px)}
+.ct{font-family:var(--df);font-size:clamp(30px,3.6vw,42px);font-weight:600;color:var(--text);margin-bottom:clamp(5px,.8vh,10px)}
+.cb{font-size:clamp(24px,2.6vw,30px);color:var(--text2);line-height:1.55}
+
+.tag{display:inline-block;padding:5px 14px;border-radius:5px;font-size:clamp(20px,2vw,26px);margin:3px 4px 3px 0;font-family:var(--mf);font-weight:500}
+.tag-g{background:var(--accent-bg);color:var(--accent)}
+.tag-b{background:var(--blue-bg);color:var(--blue)}
+.tag-t{background:var(--teal-bg);color:var(--teal)}
+.tag-c{background:var(--coral-bg);color:var(--coral)}
+.tag-p{background:var(--purple-bg);color:var(--purple)}
+
+.aline{width:clamp(36px,5vw,70px);height:3px;background:var(--accent);border-radius:2px}
+
+/* COVER */
+.s-cover{background:var(--bg);align-items:center;justify-content:center;text-align:center}
+.s-cover .ci{position:relative;z-index:1}
+.s-cover .cbadge{display:inline-block;padding:8px 24px;border:1px solid var(--border2);border-radius:24px;font-size:clamp(22px,2.2vw,28px);color:var(--text3);letter-spacing:.12em;margin-bottom:clamp(18px,3vh,32px)}
+.s-cover .ctitle{font-family:var(--df);font-size:clamp(72px,12vw,136px);font-weight:700;line-height:1.1;color:var(--text);margin-bottom:10px}
+.s-cover .csub{font-size:clamp(30px,4vw,44px);color:var(--text2);margin-bottom:clamp(20px,3.5vh,36px);font-weight:300}
+.s-cover .cmeta{display:flex;justify-content:center;gap:clamp(24px,5vw,64px);margin-bottom:clamp(14px,2vh,24px);flex-wrap:wrap}
+.s-cover .mi{text-align:center}
+.s-cover .ml{font-size:20px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.s-cover .mv{font-family:var(--mf);font-size:clamp(28px,3.2vw,36px);color:var(--accent);font-weight:600}
+.s-cover .cteam{display:inline-block;padding:18px 44px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2)}
+.s-cover .tl{font-size:20px;color:var(--text3);margin-bottom:8px;letter-spacing:.08em}
+.s-cover .tn{font-size:clamp(28px,3vw,36px);color:var(--text)}
+
+/* OVERVIEW */
+.ovgrid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1.2vw,16px);flex:1;min-height:0}
+.ovgrid .full{grid-column:1/-1}
+.modgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.moditem{text-align:center;padding:10px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg)}
+.moditem .a{font-size:clamp(18px,1.8vw,22px);color:var(--text3);margin-bottom:3px}
+.moditem .b{font-size:clamp(22px,2.2vw,28px);color:var(--text);font-weight:500}
+
+/* TECH */
+.techgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(12px,1.8vw,22px);flex:1;min-height:0}
+.archbox{border:1px solid var(--border2);border-radius:10px;padding:clamp(14px,1.8vw,22px);background:var(--bg2);display:flex;flex-direction:column;gap:6px}
+.alayer{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg)}
+.alayer .ll{font-family:var(--mf);font-size:clamp(20px,2vw,24px);color:var(--text3);min-width:65px}
+.alayer .lc{font-size:clamp(22px,2.4vw,28px);color:var(--text2)}
+.aarrow{text-align:center;font-size:18px;color:var(--text3);line-height:1}
+.flist{display:flex;flex-direction:column;gap:7px}
+.fitem{display:flex;align-items:flex-start;gap:12px;padding:9px 14px;border:1px solid var(--border);border-radius:7px;background:var(--bg2)}
+.fdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:7px}
+.fname{font-size:clamp(24px,2.4vw,30px);font-weight:600;color:var(--text);margin-bottom:1px}
+.fdesc{font-size:clamp(20px,2vw,24px);color:var(--text3);line-height:1.45}
+
+/* DEMO */
+.demogrid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.8vw,22px);flex:1;min-height:0}
+.dflow{display:flex;flex-direction:column;gap:8px}
+.dstep{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg2)}
+.dnum{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mf);font-size:clamp(24px,2.4vw,30px);font-weight:700;flex-shrink:0}
+.dtext{font-size:clamp(24px,2.6vw,30px);color:var(--text2);line-height:1.4}
+.hbar{padding:12px 16px;border-radius:7px;border:1px solid;font-size:clamp(22px,2.2vw,28px);line-height:1.45}
+
+/* TEAM */
+.teamgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.2vw,14px)}
+.mcard{border:1px solid var(--border2);border-radius:10px;background:var(--bg2);padding:clamp(14px,1.8vw,24px);text-align:center}
+.avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:var(--df);font-size:28px;font-weight:700}
+.mname{font-family:var(--df);font-size:clamp(34px,4.4vw,48px);font-weight:600;color:var(--text);margin-bottom:4px}
+.mrole{font-size:clamp(22px,2.2vw,26px);color:var(--text3);margin-bottom:8px;line-height:1.4}
+.mtags{display:flex;flex-wrap:wrap;justify-content:center;gap:5px}
+.cbar{margin-top:clamp(10px,1.5vh,16px);padding:clamp(12px,1.5vw,20px);border:1px solid var(--border2);border-radius:10px;background:var(--bg2)}
+.ctitle2{font-size:clamp(28px,3vw,36px);font-weight:600;color:var(--text);margin-bottom:8px}
+.cflow{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;font-size:clamp(22px,2.2vw,26px);color:var(--text2);line-height:1.5}
+.cflow .arr{color:var(--accent);font-weight:700}
+
+/* HIGHLIGHTS */
+.hlgrid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,18px);flex:1;min-height:0}
+.hlcard{border-left:3px solid;border-radius:0 10px 10px 0;background:var(--bg2);padding:clamp(14px,1.8vw,22px)}
+.hlcard .hlt{font-family:var(--df);font-size:clamp(28px,3.4vw,40px);font-weight:600;color:var(--text);margin-bottom:6px}
+.hlcard .hld{font-size:clamp(22px,2.4vw,28px);color:var(--text2);line-height:1.5}
+.aigrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.aiitem{padding:10px 13px;border:1px solid var(--border);border-radius:7px;background:var(--bg)}
+.aiitem .aik{font-size:clamp(22px,2.2vw,26px);font-weight:600;color:var(--blue);margin-bottom:3px}
+.aiitem .aiv{font-size:clamp(20px,2vw,24px);color:var(--text2);line-height:1.45}
+
+/* END */
+.s-end{background:var(--bg);align-items:center;justify-content:center;text-align:center}
+.s-end .etitle{font-family:var(--df);font-size:clamp(80px,14vw,168px);font-weight:700;color:transparent;-webkit-text-stroke:2px var(--accent);letter-spacing:-.02em;margin-bottom:14px}
+.s-end .esub{font-size:clamp(36px,5.6vw,56px);color:var(--text);margin-bottom:10px}
+.s-end .edesc{font-size:clamp(26px,3vw,34px);color:var(--text3);margin-bottom:clamp(18px,3vh,32px);line-height:1.5}
+.s-end .echips{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+.echip{padding:10px 24px;border:1px solid var(--border2);border-radius:8px;font-size:clamp(24px,2.4vw,30px);color:var(--text2);font-family:var(--mf)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal:nth-child(2){transition-delay:.06s}
+.reveal:nth-child(3){transition-delay:.12s}
+.reveal:nth-child(4){transition-delay:.18s}
+.reveal:nth-child(5){transition-delay:.24s}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:999;transition:width .3s ease}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<main>
+
+<!-- ===== 01 COVER ===== -->
+<section class="slide s-cover">
+  <div class="topbar"></div>
+  <div class="ci">
+    <div class="cbadge">程序设计基础实训 · 期末成果汇报</div>
+    <div class="ctitle">SlideForge</div>
+    <div class="csub">AI 驱动的智能演示文稿生成器</div>
+    <div class="aline" style="margin:0 auto clamp(18px,2.8vh,30px);"></div>
+    <div class="cmeta">
+      <div class="mi"><div class="ml">代码规模</div><div class="mv">8,500 行</div></div>
+      <div class="mi"><div class="ml">风格模板</div><div class="mv">16 套</div></div>
+      <div class="mi"><div class="ml">单元测试</div><div class="mv">104 个</div></div>
+    </div>
+    <div class="cteam">
+      <div class="tl">小组成员</div>
+      <div class="tn">胡祖宁 · 马鑫 · 王诣博</div>
+    </div>
+  </div>
+  <div class="pg">01 / 10</div>
+</section>
+
+<!-- ===== 02 选题背景 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">Background</div>
+    <div class="sh">选题背景与项目目标</div>
+    <div class="ssub">解决什么问题？核心目标是什么？</div>
+    <div class="ovgrid">
+      <div class="card reveal">
+        <div class="ct">问题痛点</div>
+        <div class="cb"><strong>模板千篇一律</strong> — WPS/Canva 缺乏个性<br><strong>内容重组困难</strong> — 论文到 PPT 大量复制粘贴<br><strong>迭代修改耗时</strong> — 调整布局需逐页手动修改</div>
+      </div>
+      <div class="card reveal">
+        <div class="ct">核心目标</div>
+        <div class="cb"><strong>1.</strong> 上传文档，AI 自动生成结构化大纲<br><strong>2.</strong> 16 套差异化视觉风格，覆盖四大类别<br><strong>3.</strong> 自然语言对话实时修改幻灯片<br><strong>4.</strong> 一键导出 HTML / PPTX / PDF 三种格式</div>
+      </div>
+      <div class="card full reveal">
+        <div class="ct">目标用户</div>
+        <div class="cb">中国大学生和高校教师 — 上传课程笔记或论文，选择风格，AI 生成完整 PPT，对话微调后导出分享</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">02 / 10</div>
+</section>
+
+<!-- ===== 03 技术选型 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">Tech Stack</div>
+    <div class="sh">技术选型与功能模块</div>
+    <div class="ssub">为什么选择这些技术？</div>
+    <div class="ovgrid">
+      <div class="card reveal">
+        <div class="ct">技术栈</div>
+        <div class="cb">
+          <span class="tag tag-b">Electron</span> 跨平台桌面应用
+          <span class="tag tag-b">React 18</span> 组件化开发
+          <span class="tag tag-t">TypeScript</span> 全项目类型安全
+          <span class="tag tag-t">Vite</span> 极速 HMR 热更新
+          <span class="tag tag-g">Zustand</span> 轻量状态管理
+          <span class="tag tag-g">Emotion</span> CSS-in-JS 动态主题
+          <span class="tag tag-c">better-sqlite3</span> 本地持久化
+          <span class="tag tag-c">PptxGenJS</span> 生成 .pptx
+          <span class="tag tag-p">KaTeX</span> 数学公式渲染
+        </div>
+      </div>
+      <div class="card reveal">
+        <div class="ct">8 大功能模块</div>
+        <div class="modgrid">
+          <div class="moditem"><div class="a">输入</div><div class="b">文档解析</div></div>
+          <div class="moditem"><div class="a">AI</div><div class="b">大纲生成</div></div>
+          <div class="moditem"><div class="a">风格</div><div class="b">16 套模板</div></div>
+          <div class="moditem"><div class="a">预览</div><div class="b">实时渲染</div></div>
+          <div class="moditem"><div class="a">对话</div><div class="b">AI 修改</div></div>
+          <div class="moditem"><div class="a">编辑</div><div class="b">大纲编辑</div></div>
+          <div class="moditem"><div class="a">导出</div><div class="b">3 种格式</div></div>
+          <div class="moditem"><div class="a">存储</div><div class="b">SQLite</div></div>
+        </div>
+      </div>
+      <div class="card full reveal">
+        <div class="ct">AI 多模型支持</div>
+        <div class="cb"><span class="tag tag-b">GPT-4</span><span class="tag tag-p">Claude</span><span class="tag tag-t">DeepSeek</span><span class="tag tag-c">通义千问</span> — 统一 OpenAI 兼容适配器，baseURL 切换即可，支持流式 SSE 输出</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">03 / 10</div>
+</section>
+
+<!-- ===== 04 技术架构 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">Architecture</div>
+    <div class="sh">三层架构设计</div>
+    <div class="ssub">主进程 / 预加载 / 渲染进程分离，IPC 通信解耦</div>
+    <div class="techgrid">
+      <div class="archbox reveal">
+        <div class="alayer" style="background:var(--accent-bg);border-color:rgba(139,105,20,.15)">
+          <div class="ll">渲染层</div>
+          <div class="lc">React 18 · Zustand · Emotion · 向导 · 编辑器</div>
+        </div>
+        <div class="aarrow">&#11039; contextBridge IPC</div>
+        <div class="alayer" style="background:var(--blue-bg);border-color:rgba(46,80,144,.12)">
+          <div class="ll">预加载</div>
+          <div class="lc">类型安全 API · safeStore 加密 · SSE 事件</div>
+        </div>
+        <div class="aarrow">&#11039;</div>
+        <div class="alayer" style="background:var(--teal-bg);border-color:rgba(26,122,92,.12)">
+          <div class="ll">主进程</div>
+          <div class="lc">AI 适配器 · HTML/PPTX/PDF 导出 · SQLite</div>
+        </div>
+        <div class="aarrow">&#11039;</div>
+        <div class="alayer" style="background:var(--coral-bg);border-color:rgba(184,66,51,.10)">
+          <div class="ll">AI 层</div>
+          <div class="lc">OpenAI 兼容接口 · 流式输出 · Prompt 注入</div>
+        </div>
+      </div>
+      <div class="flist reveal">
+        <div class="ct">核心功能</div>
+        <div class="fitem"><div class="fdot" style="background:var(--teal)"></div><div><div class="fname">文档解析</div><div class="fdesc">PDF / DOCX / TXT / MD，AI 生成可编辑大纲</div></div></div>
+        <div class="fitem"><div class="fdot" style="background:var(--blue)"></div><div><div class="fname">16 套风格模板</div><div class="fdesc">暗色×4 · 亮色×4 · 专业×4 · 艺术×4</div></div></div>
+        <div class="fitem"><div class="fdot" style="background:var(--accent)"></div><div><div class="fname">12 种布局</div><div class="fdesc">title / content / two-column / highlight 等</div></div></div>
+        <div class="fitem"><div class="fdot" style="background:var(--coral)"></div><div><div class="fname">AI 对话修改</div><div class="fdesc">流式输出 + JSON 解析 + 实时预览同步</div></div></div>
+        <div class="fitem"><div class="fdot" style="background:var(--text3)"></div><div><div class="fname">三格式导出</div><div class="fdesc">零依赖 HTML · PPTX · PDF</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">04 / 10</div>
+</section>
+
+<!-- ===== 05 核心流程 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">Workflow</div>
+    <div class="sh">核心使用流程</div>
+    <div class="ssub">六步从文档到精美演示文稿</div>
+    <div class="demogrid">
+      <div class="dflow reveal">
+        <div class="dstep"><div class="dnum" style="background:var(--accent-bg);color:var(--accent)">1</div><div class="dtext"><strong>上传文档</strong> — PDF / DOCX / TXT / MD 文件解析为纯文本</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--blue-bg);color:var(--blue)">2</div><div class="dtext"><strong>AI 生成大纲</strong> — 结构化章节+要点，可编辑排序</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--teal-bg);color:var(--teal)">3</div><div class="dtext"><strong>选择风格</strong> — 情绪标签推荐 + 16 套模板浏览</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--coral-bg);color:var(--coral)">4</div><div class="dtext"><strong>AI 生成幻灯片</strong> — 自动选择最佳布局</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--accent-bg);color:var(--accent)">5</div><div class="dtext"><strong>AI 对话微调</strong> — 自然语言修改，实时预览</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--blue-bg);color:var(--blue)">6</div><div class="dtext"><strong>导出分享</strong> — HTML / PPTX / PDF 一键输出</div></div>
+      </div>
+      <div class="reveal" style="display:flex;flex-direction:column;gap:8px">
+        <div class="card">
+          <div class="ct">Prompt 工程设计</div>
+          <div class="cb"><strong>上下文注入</strong> — 全部幻灯片 JSON 注入 System Prompt<br><br><strong>格式约束</strong> — ```slide-updates``` 代码块返回结构化 JSON<br><br><strong>内容规范</strong> — body 每条 ≤25 字，禁止 Markdown<br><br><strong>清洗管道</strong> — 自动剥离加粗/标题/列表符号，布局容错映射</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">05 / 10</div>
+</section>
+
+<!-- ===== 06 成果演示 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">Demo</div>
+    <div class="sh">成果演示指南</div>
+    <div class="ssub">演示时长约 6 分钟</div>
+    <div class="demogrid">
+      <div class="dflow reveal">
+        <div class="dstep"><div class="dnum" style="background:var(--accent-bg);color:var(--accent)">1</div><div class="dtext"><strong>展示主界面</strong> — 三栏：大纲+预览+AI 聊天</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--blue-bg);color:var(--blue)">2</div><div class="dtext"><strong>创建向导</strong> — 主题→范围→情绪→风格→生成</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--teal-bg);color:var(--teal)">3</div><div class="dtext"><strong>切换风格</strong> — 中国水墨 ↔ 霓虹赛博对比</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--coral-bg);color:var(--coral)">4</div><div class="dtext"><strong>AI 修改</strong> — 输入指令，观察实时更新</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--accent-bg);color:var(--accent)">5</div><div class="dtext"><strong>导出 HTML</strong> — 零依赖浏览器直接打开</div></div>
+        <div class="dstep"><div class="dnum" style="background:var(--blue-bg);color:var(--blue)">6</div><div class="dtext"><strong>全屏演示</strong> — 切换动画+键盘导航</div></div>
+      </div>
+      <div class="reveal" style="display:flex;flex-direction:column;gap:8px">
+        <div class="hbar" style="background:var(--teal-bg);border-color:rgba(26,122,92,.2);color:var(--teal)">12 种幻灯片布局 — 标题/内容/双栏/高亮/网格/时间轴等</div>
+        <div class="hbar" style="background:var(--accent-bg);border-color:rgba(139,105,20,.2);color:var(--accent)">KaTeX 数学公式 — 支持 $E=mc^2$ 和 $$\sum x_i$$</div>
+        <div class="hbar" style="background:var(--blue-bg);border-color:rgba(46,80,144,.2);color:var(--blue)">中英双语 i18n · Material Design 3 · Emotion 主题注入</div>
+        <div class="hbar" style="background:var(--coral-bg);border-color:rgba(184,66,51,.2);color:var(--coral)">safeStore 密钥加密 · SQLite 本地持久化</div>
+        <div class="hbar" style="background:var(--purple-bg);border-color:rgba(107,76,154,.2);color:var(--purple)">104 个单元测试 — 主题配置·颜色函数·布局·AI 类型</div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">06 / 10</div>
+</section>
+
+<!-- ===== 07 团队分工 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">Team</div>
+    <div class="sh">团队分工与协作</div>
+    <div class="ssub">TypeScript 接口契约驱动开发，工作量均衡</div>
+    <div class="teamgrid reveal">
+      <div class="mcard">
+        <div class="avatar" style="background:var(--blue-bg);color:var(--blue)">胡</div>
+        <div class="mname">胡祖宁</div>
+        <div class="mrole">前端架构 &amp; AI Prompt（~36%）</div>
+        <div class="mtags"><span class="tag tag-b">架构</span><span class="tag tag-b">Zustand</span><span class="tag tag-b">AI</span><span class="tag tag-g">Prompt</span></div>
+      </div>
+      <div class="mcard">
+        <div class="avatar" style="background:var(--teal-bg);color:var(--teal)">马</div>
+        <div class="mname">马鑫</div>
+        <div class="mrole">导出引擎 &amp; 文件处理（~29%）</div>
+        <div class="mtags"><span class="tag tag-t">HTML</span><span class="tag tag-t">PPTX</span><span class="tag tag-t">PDF</span><span class="tag tag-g">样式</span></div>
+      </div>
+      <div class="mcard">
+        <div class="avatar" style="background:var(--accent-bg);color:var(--accent)">王</div>
+        <div class="mname">王诣博</div>
+        <div class="mrole">UI/UX 设计 &amp; 测试（~35%）</div>
+        <div class="mtags"><span class="tag tag-g">16 主题</span><span class="tag tag-g">渲染器</span><span class="tag tag-c">104 测试</span></div>
+      </div>
+    </div>
+    <div class="cbar reveal">
+      <div class="ctitle2">协作模式：TypeScript 接口契约</div>
+      <div class="cflow">
+        <span>胡祖宁定义核心类型</span>
+        <span class="arr">&#10132;</span>
+        <span>马鑫实现导出引擎</span>
+        <span class="arr">&#10132;</span>
+        <span>王诣博实现渲染器</span>
+        <span class="arr">|</span>
+        <span>马鑫定义 StyleConfig</span>
+        <span class="arr">&#10132;</span>
+        <span>王诣博实现 DesignTokens</span>
+      </div>
+    </div>
+  </div>
+  <div class="pg">07 / 10</div>
+</section>
+
+<!-- ===== 08 技术亮点 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">Highlights</div>
+    <div class="sh">技术亮点</div>
+    <div class="ssub">核心难题的解决方案</div>
+    <div class="hlgrid">
+      <div style="display:flex;flex-direction:column;gap:clamp(6px,1vh,12px)">
+        <div class="hlcard reveal" style="border-color:var(--blue)">
+          <div class="hlt">多模型适配器</div>
+          <div class="hld">统一 OpenAI 兼容接口，baseURL + apiKey 切换 GPT-4 / Claude / DeepSeek / 通义千问，业务代码零改动</div>
+        </div>
+        <div class="hlcard reveal" style="border-color:var(--teal)">
+          <div class="hlt">双轨样式系统</div>
+          <div class="hld">主进程 StyleConfig（导出）+ 渲染进程 DesignTokens（预览），确保"所见即所出"</div>
+        </div>
+        <div class="hlcard reveal" style="border-color:var(--accent)">
+          <div class="hlt">Prompt 工程 + JSON 容错</div>
+          <div class="hld">上下文注入 + 格式约束 + 清洗管道，支持两种代码块格式和布局容错映射</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:clamp(6px,1vh,12px)">
+        <div class="hlcard reveal" style="border-color:var(--purple)">
+          <div class="hlt">零依赖 HTML 导出</div>
+          <div class="hld">CSS/JS/字体 URL 全部内联为单文件，clamp() 响应式适配任意屏幕</div>
+        </div>
+        <div class="hlcard reveal" style="border-color:var(--coral)">
+          <div class="hlt">流式输出 + 实时预览</div>
+          <div class="hld">IPC 流式传输逐字显示，Zustand 响应式驱动 React 组件重渲染</div>
+        </div>
+        <div class="hlcard reveal" style="border-color:var(--text3)">
+          <div class="hlt">安全密钥管理</div>
+          <div class="hld">Electron safeStore API 加密存储 API Key，IPC 仅暴露必要接口</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">08 / 10</div>
+</section>
+
+<!-- ===== 09 AI协作 ===== -->
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="sc">
+    <div class="slabel">AI Collaboration</div>
+    <div class="sh">AI 辅助与总结</div>
+    <div class="ssub">人机结对编程的实践与体会</div>
+    <div class="hlgrid">
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,1.2vh,14px)">
+        <div class="card reveal">
+          <div class="ct" style="color:var(--blue)">AI 辅助四个维度</div>
+          <div class="aigrid">
+            <div class="aiitem"><div class="aik">架构设计</div><div class="aiv">对比 Electron+React vs Tauri+Vue 等技术方案</div></div>
+            <div class="aiitem"><div class="aik">代码调试</div><div class="aiv">快速定位 IPC 通信和状态同步问题</div></div>
+            <div class="aiitem"><div class="aik">测试补充</div><div class="aiv">生成主题配置校验、颜色函数边界测试</div></div>
+            <div class="aiitem"><div class="aik">代码审查</div><div class="aiv">检查 XSS 风险、密钥存储、性能瓶颈</div></div>
+          </div>
+        </div>
+        <div class="card reveal" style="background:var(--accent-bg);border-color:rgba(139,105,20,.15)">
+          <div class="ct" style="color:var(--accent)">核心体会</div>
+          <div class="cb">AI 擅长生成"80 分"代码，80 到 100 分的打磨仍需人的判断力。关键在于提出好问题。</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,1.2vh,14px)">
+        <div class="card reveal">
+          <div class="ct" style="color:var(--teal)">项目成果</div>
+          <div class="cb"><strong>已完成：</strong>文档解析、AI 大纲、16 套风格、12 种布局、AI 对话、三格式导出、双语 i18n<br><br><strong>超出预期：</strong>水墨/极光等艺术主题、KaTeX 公式、全屏演示、密钥加密、104 个测试</div>
+        </div>
+        <div class="card reveal" style="background:var(--teal-bg);border-color:rgba(26,122,92,.15)">
+          <div class="ct" style="color:var(--teal)">最大挑战</div>
+          <div class="cb">AI 返回 JSON 格式不稳定 — 多级容错：先 slide-updates 格式，降级 json 格式，布局名称容错映射</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">09 / 10</div>
+</section>
+
+<!-- ===== 10 END ===== -->
+<section class="slide s-end">
+  <div class="topbar"></div>
+  <div class="etitle">Thank You</div>
+  <div class="esub">感谢聆听，欢迎提问</div>
+  <div class="edesc">完整源码 8,500 行 · 104 个单元测试</div>
+  <div class="echips">
+    <div class="echip">源码 8,500 行</div>
+    <div class="echip">测试 104 个</div>
+    <div class="echip">风格 16 套</div>
+    <div class="echip">布局 12 种</div>
+    <div class="echip">导出 3 格式</div>
+    <div class="echip">AI 模型 4 个</div>
+  </div>
+  <div class="pg">10 / 10</div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  var slides=document.querySelectorAll('.slide');
+  var total=slides.length;
+  var current=0;
+  function up(){document.getElementById('progress').style.width=((current+1)/total*100)+'%'}
+  function goTo(n){if(n<0||n>=total)return;current=n;slides[current].scrollIntoView({behavior:'smooth'});up()}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();goTo(current+1)}
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goTo(current-1)}
+    if(e.key==='Home'){e.preventDefault();goTo(0)}
+    if(e.key==='End'){e.preventDefault();goTo(total-1)}
+  });
+  var wl=false;
+  document.addEventListener('wheel',function(e){if(wl)return;wl=true;setTimeout(function(){wl=false},800);if(e.deltaY>0)goTo(current+1);else if(e.deltaY<0)goTo(current-1)},{passive:true});
+  var ty=0;
+  document.addEventListener('touchstart',function(e){ty=e.touches[0].clientY});
+  document.addEventListener('touchend',function(e){var d=ty-e.changedTouches[0].clientY;if(Math.abs(d)>50){if(d>0)goTo(current+1);else goTo(current-1)}});
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting&&en.intersectionRatio>.5){current=Array.from(slides).indexOf(en.target);up()}})},{threshold:.5});
+  slides.forEach(function(s){obs.observe(s)});
+  var ro=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting)en.target.classList.add('visible')})},{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el)});
+  up();
+})();
+</script>
+</body>
+</html>

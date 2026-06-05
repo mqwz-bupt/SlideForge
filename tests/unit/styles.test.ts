@@ -12,7 +12,8 @@ describe('getStyleConfig', () => {
   const ALL_PRESETS = [
     'bold-signal', 'electric-studio', 'creative-voltage', 'dark-botanical',
     'notebook-tabs', 'pastel-geometry', 'split-pastel', 'vintage-editorial',
-    'neon-cyber', 'terminal-green', 'swiss-modern', 'paper-ink'
+    'neon-cyber', 'terminal-green', 'swiss-modern', 'paper-ink',
+    'chinese-ink', 'cinematic', 'neo-brutalist', 'aurora'
   ]
 
   it('returns config for every known preset', () => {

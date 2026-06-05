@@ -198,6 +198,7 @@ export function PreviewArea() {
   const setActiveSectionId = useAppStore((s) => s.setActiveSectionId)
   const setActivePointIndex = useAppStore((s) => s.setActivePointIndex)
   const project = useProjectStore((s) => s.currentProject)
+  const slideVersion = useProjectStore((s) => s.slideVersion)
   const selectedStyle = useProjectStore((s) => s.selectedStyle)
   const setSelectedStyle = useProjectStore((s) => s.setSelectedStyle)
   const addSlide = useProjectStore((s) => s.addSlide)
@@ -402,7 +403,7 @@ export function PreviewArea() {
 
       <SlideMain onWheel={handleWheel}>
         <SlideCanvas style={cssVars}>
-          <SlideTransition key={safeIndex} direction={slideDirection}>
+          <SlideTransition key={`${safeIndex}-${slideVersion}`} direction={slideDirection}>
             <SlideRenderer
               slide={currentSlide}
               slideIndex={safeIndex}
@@ -437,7 +438,7 @@ export function PreviewArea() {
         }}>
           <FullscreenWrapper style={{ width: 960 * fsScale, height: 540 * fsScale }} onClick={(e) => e.stopPropagation()}>
             <FullscreenCanvas style={{ ...cssVars, transform: `scale(${fsScale})` }}>
-              <SlideTransition key={safeIndex} direction={slideDirection}>
+              <SlideTransition key={`${safeIndex}-${slideVersion}`} direction={slideDirection}>
                 <SlideRenderer
                   slide={currentSlide}
                   slideIndex={safeIndex}
